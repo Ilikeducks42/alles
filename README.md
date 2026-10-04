@@ -11,11 +11,19 @@ Sammlung endloser Spiele, gesteuert ausschließlich durch Geräte-Neigung. Kein 
 
 Alle Einstellungen und Bestwerte bleiben in `localStorage` gespeichert.
 
-## Modus 2: Hauptgerät + Handy als Controller (ultra einfach)
+## Modus 2: Hauptgerät + Handy als Controller
+
+Auf 1. Gerät:
+https://Ilikeducks42.github.io/tilt/index-standalone.html
+
+Auf 2. Gerät:
+https://Ilikeducks42.github.io/tilt/controller-standalone.html
+
+**ODER**:
 
 Kein Terminal, kein lokaler Server, keine IP-Adressen, kein langes Abtippen:
 
-1. **Controller aufs Handy bringen (eine Datei genügt):** Schicke die Datei `controller-standalone.html` aufs Handy (WhatsApp, USB, E-Mail — sie enthält alles, kein Ordner nötig). Dort im Browser öffnen.
+1. **Controller aufs Handy bringen (eine Datei genügt):** Dort im Browser öffnen.
    - Erscheint oben eine **rote Box**, ist die Datei unvollständig — dann erneut die Standalone-Datei übertragen.
 2. Hauptgerät (PC): `index.html` → **Externer Controller** → **Code erzeugen** (4-stellig, z. B. 4821).
 3. Beide Geräte ins **gleiche WLAN**.
