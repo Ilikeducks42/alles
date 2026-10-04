@@ -237,6 +237,11 @@ window.addEventListener('load',function(){
     </div>
   </div>
 
+  <div class="glass card" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+    <button id="c-action" style="width:132px;height:132px;border-radius:50%;border:0;background:var(--accent);color:#fff;font:700 18px -apple-system,sans-serif;box-shadow:0 10px 30px rgba(0,122,255,.35);-webkit-tap-highlight-color:transparent;touch-action:manipulation">Aktion</button>
+    <div style="font-size:12px;opacity:.6;text-align:center">Im Spiel ohne Funktion — nach dem Verlieren: Neustart</div>
+  </div>
+
   <div class="foot">Halte das Handy quer oder hoch — kalibriere danach.<br>Die Übertragung läuft Peer-to-Peer, ohne Cloud.</div>
 </div>
 <script>
@@ -484,7 +489,7 @@ window.addEventListener('load',function(){
       ch.onmessage=function(ev){
         try{
           var m=JSON.parse(ev.data);
-          if(typeof m.x==='number' && typeof m.y==='number'){
+          if(m&&m.b){ try{window.dispatchEvent(new Event('tilt-button'));}catch(e){} } else if(typeof m.x==='number' && typeof m.y==='number'){
             if(window.Tilt){ Tilt.onRemote(m.x,m.y); Tilt.setRemoteActive(true); }
             if(onTilt) onTilt(m);
           }
@@ -534,6 +539,7 @@ window.addEventListener('load',function(){
         try{ this.ch.send(JSON.stringify({x:+x.toFixed(3),y:+y.toFixed(3),t:Date.now()})); }catch(e){}
       }
     },
+    sendButton:function(){ if(this.ch && this.ch.readyState==='open'){ try{ this.ch.send(JSON.stringify({b:1,t:Date.now()})); }catch(e){} } },
     close:function(){ try{ if(this.pc)this.pc.close(); }catch(e){} this.connected=false; }
   };
 
@@ -709,7 +715,7 @@ window.addEventListener('load',function(){
       ch.onmessage=function(evm){
         try{
           var m=JSON.parse(evm.data);
-          if(m&&typeof m.x==='number'){
+          if(m&&m.b){ try{window.dispatchEvent(new Event('tilt-button'));}catch(e){} } else if(m&&typeof m.x==='number'){
             if(window.Tilt){ Tilt.onRemote(m.x,m.y); Tilt.setRemoteActive(true); }
             if(ev.tilt)ev.tilt(m);
           }
@@ -775,6 +781,7 @@ window.addEventListener('load',function(){
       var handle={
         close:function(){ closed=true; if(helloT)clearInterval(helloT); if(link){ try{link.clear(topic);}catch(e){} link.close(); } try{if(pc)pc.close();}catch(e){} },
         send:function(x,y){ if(ch&&ch.readyState==='open'){ try{ch.send(JSON.stringify({x:+x.toFixed(3),y:+y.toFixed(3),t:Date.now()}));}catch(e){} } },
+        sendButton:function(){ if(ch&&ch.readyState==='open'){ try{ch.send(JSON.stringify({b:1,t:Date.now()}));}catch(e){} } },
         isOpen:function(){ return !!(ch&&ch.readyState==='open'); }
       };
       if(!code){ st('error'); return handle; }
@@ -858,6 +865,10 @@ window.addEventListener('load',function(){
     while(d.children.length>6) d.removeChild(d.firstChild);
   }
   // --- Ultra einfach: 4-stelliger Code ---
+  $('c-action').addEventListener('click',function(){
+    try{ if(autoHandle&&autoHandle.sendButton&&autoHandle.isOpen&&autoHandle.isOpen()) autoHandle.sendButton(); else if(window.NetClient&&NetClient.sendButton) NetClient.sendButton(); }catch(e){}
+    if(navigator.vibrate) try{navigator.vibrate(25);}catch(e){}
+  });
   $('c-auto').addEventListener('click',function(){
     Tilt.autoRequest().then(function(r){ if(r==='granted')$('c-perm').style.display='none'; }); try{ if(navigator.wakeLock) navigator.wakeLock.request('screen').catch(function(){}); }catch(e){}
     var code=$('c-code').value.replace(/\D/g,'').slice(0,4);
