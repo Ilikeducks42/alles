@@ -2,7 +2,7 @@
 
 Sammlung endloser Spiele, gesteuert ausschließlich durch Geräte-Neigung.
 
-## Schnellstart (ein Gerät)
+## Schnellstart (ein Gerät):
 
 1. `tilt-glass/index.html` im Browser öffnen (Doppelklick genügt).
 2. Auf dem Handy: **Sensor erlauben** (nur iOS), Gerät in neutrale Haltung bringen, **Neigung kalibrieren**.
