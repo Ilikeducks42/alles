@@ -230,6 +230,7 @@ window.addEventListener('load',function(){
         <div class="sendbar"><i id="c-bar"></i></div>
         <div class="row" style="margin-top:12px;flex-wrap:wrap">
           <button class="btn btn-ghost btn-small" id="c-cal">Neigung kalibrieren</button>
+          <button class="btn btn-ghost btn-small" id="c-swap">Achsen tauschen: aus</button>
           <button class="btn btn-ghost btn-small" id="c-perm" style="display:none">Sensor erlauben</button>
         </div>
       </div>
@@ -250,7 +251,7 @@ window.addEventListener('load',function(){
     getBest:function(id){ var b=loadJSON(LS_BEST,{}); return b[id]||0; },
     setBest:function(id,v){ var b=loadJSON(LS_BEST,{}); if(v>(b[id]||0)){ b[id]=v; saveJSON(LS_BEST,b); return true; } return false; },
     allBest:function(){ return loadJSON(LS_BEST,{}); },
-    getSettings:function(){ return Object.assign({mode:'single',smoothing:.28,sensitivity:1},loadJSON(LS_SET,{})); },
+    getSettings:function(){ return Object.assign({mode:'single',smoothing:.28,sensitivity:1,swap:false},loadJSON(LS_SET,{})); },
     saveSettings:function(s){ saveJSON(LS_SET,s); }
   };
   window.Store=Store;
@@ -270,7 +271,7 @@ window.addEventListener('load',function(){
     lastR:0,lastP:0,orientEvents:0,motionEvents:0,iosFlip:/iP(hone|ad|od)/.test(navigator.userAgent||'')||(/Mac/.test(navigator.userAgent||'')&&navigator.maxTouchPoints>1),
     raw:{x:0,y:0}, filt:{x:0,y:0},
     hasSensor:false, permission:'unknown',
-    smoothing:.28, sensitivity:1,
+    smoothing:.28, sensitivity:1, swap:false,
     deadzone:.045,
     remote:{x:0,y:0,t:0},
     remoteActive:false,
@@ -283,6 +284,7 @@ window.addEventListener('load',function(){
       opts=opts||{};
       if(typeof opts.smoothing==='number') this.smoothing=opts.smoothing;
       if(typeof opts.sensitivity==='number') this.sensitivity=opts.sensitivity;
+      if(typeof opts.swap==='boolean') this.swap=opts.swap;
       var self=this;
       window.addEventListener('deviceorientation',function(e){ self._onOrient(e); },true);
       window.addEventListener('deviceorientationabsolute',function(e){ if(e.gamma!=null && !self.orientEvents) self._onOrient(e); },true);
@@ -381,8 +383,8 @@ window.addEventListener('load',function(){
       var nx=Math.max(-1,Math.min(1,-dx/range)); // rechts gekippt = +
       var ny=Math.max(-1,Math.min(1,dy/range));  // Oberkante zum Nutzer = hinten (+)
       function dz(v,d){ var a=Math.abs(v); if(a<d) return 0; return (v>0?1:-1)*(a-d)/(1-d); }
-      this.raw.x=dz(nx,this.deadzone);
-      this.raw.y=dz(ny,this.deadzone);
+      var rx=dz(nx,this.deadzone), ry=dz(ny,this.deadzone);
+      if(this.swap){ this.raw.x=ry; this.raw.y=rx; } else { this.raw.x=rx; this.raw.y=ry; }
     },
 
     calibrate:function(){
@@ -428,6 +430,7 @@ window.addEventListener('load',function(){
         if(this._keys.u)ky-=1; if(this._keys.d)ky+=1;
         var tX=kx!==0?kx:(this._mouse.active?this._mouse.x:0);
         var tY=ky!==0?ky:(this._mouse.active?this._mouse.y*.9:0);
+        if(this.swap){ var tmp=tX; tX=tY; tY=tmp; }
         var al2=.18;
         this.filt.x+=(tX-this.filt.x)*al2;
         this.filt.y+=(tY-this.filt.y)*al2;
@@ -829,7 +832,10 @@ window.addEventListener('load',function(){
 <script>
 (function(){
   var $=function(id){return document.getElementById(id);};
-  Tilt.init({smoothing:.3,sensitivity:1});
+  var st0=Store.getSettings();
+  Tilt.init({smoothing:.3,sensitivity:1,swap:!!st0.swap});
+  (function(){ var b=document.getElementById('c-swap'); function r(){ b.textContent='Achsen tauschen: '+(Tilt.swap?'an':'aus'); }
+    b.addEventListener('click',function(){ Tilt.swap=!Tilt.swap; st0.swap=Tilt.swap; Store.saveSettings(st0); Tilt.filt.x=0;Tilt.filt.y=0;Tilt.raw.x=0;Tilt.raw.y=0; r(); }); r(); })();
   var pill=$('c-status'), dot=$('c-dot');
   function setPill(mode,text){
     pill.innerHTML='<span class="dotpulse"></span> '+text;
