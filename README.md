@@ -1,6 +1,6 @@
 # Tilt Glass — Spielen durch Neigen
 
-Sammlung endloser Spiele, gesteuert ausschließlich durch Geräte-Neigung. Kein Build, keine Dependencies, kein Terminal nötig.
+Sammlung endloser Spiele, gesteuert ausschließlich durch Geräte-Neigung.
 
 ## Schnellstart (ein Gerät)
 
@@ -21,8 +21,6 @@ https://Ilikeducks42.github.io/tilt/controller-standalone.html
 
 **ODER**:
 
-Kein Terminal, kein lokaler Server, keine IP-Adressen, kein langes Abtippen:
-
 1. **Controller aufs Handy bringen (eine Datei genügt):** Dort im Browser öffnen.
    - Erscheint oben eine **rote Box**, ist die Datei unvollständig — dann erneut die Standalone-Datei übertragen.
 2. Hauptgerät (PC): `index.html` → **Externer Controller** → **Code erzeugen** (4-stellig, z. B. 4821).
@@ -31,7 +29,7 @@ Kein Terminal, kein lokaler Server, keine IP-Adressen, kein langes Abtippen:
 
 Unter dem Code-Feld läuft ein kleines **Diagnose-Protokoll** mit (z. B. „Vermittlung ok, Code aktiv“ → „Code gefunden“ → „Direktverbindung steht“). Bleibt es hängen, steht dort auch die Ursache.
 
-Technik: Die Code-Vermittlung läuft einmalig über einen öffentlichen Rendezvous-Punkt (Internet nötig). Die Neigung selbst läuft danach direkt Peer-to-Peer per WebRTC (ca. 40 Pakete/s). Klappt die direkte Verbindung nicht (z. B. Gast-WLAN mit Geräte-Isolation), wird automatisch ein Relay-Server benutzt. Ganz ohne Internet geht es per „Code kopieren (Fallback)“.
+Technik: Die Code-Vermittlung läuft einmalig über einen öffentlichen Rendezvous-Punkt (Internet nötig). Die Neigung selbst läuft danach direkt Peer-to-Peer per WebRTC (ca. 40 Pakete/s). Klappt die direkte Verbindung nicht, wird automatisch ein Relay-Server benutzt. Ganz ohne Internet geht es per „Code kopieren (Fallback)“.
 
 ## Wenn es nicht klappt
 
@@ -43,17 +41,13 @@ Technik: Die Code-Vermittlung läuft einmalig über einen öffentlichen Rendezvo
 | „Direktverbindung blockiert“ | WLAN isoliert Geräte (Gast-WLAN!) → normales Heim-WLAN nutzen |
 | Datei `controller.html` statt Standalone | funktioniert nur mit dem `js`-Ordner daneben |
 
-Die Ein-Datei-Versionen werden aus den Quellen erzeugt (`node build-standalone.js`, nur für Entwickler nötig).
-
-## Spiele (alle echtes 3D, eigene Engine, keine Libraries)
+## Spiele
 
 - **Apex Drive** — 3D-Rennen mit Kurven und Hügeln, Verkehr, 4 Tageszonen (Tag, Wüste, Sunset, Nacht mit Scheinwerfern). Dicht auffahren gibt Combo-Bonus.
 - **Skybound** — 3D-Flug durch Ringe (Combo-System), rote Barrieren meiden, türkise Tore geben Boost.
 - **Vortex** — 3D-Röhrenflug durch grüne Tore, roten Blockern ausweichen. Die Röhre windet sich immer enger.
 - **Slackline** — 3D-Balance auf schwebendem Band mit Münzen, Böen-Warnung und Kanten-Alarm.
 - **Starfall** — 3D-Asteroidengürtel mit rotierenden Felsen, Energie-Orbs und Schild-Pickup (rettet einmal).
-
-Dazu: synthetisierte Sound-Effekte (WebAudio, keine Dateien), Partikel, Screen-Shake, Nebel und dynamische Kamera. Bestwerte bleiben pro Spiel lokal gespeichert.
 
 ## Dateien
 
