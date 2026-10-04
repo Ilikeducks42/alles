@@ -51,38 +51,8 @@ Dazu: synthetisierte Sound-Effekte (WebAudio, keine Dateien), Partikel, Screen-S
 
 ```
 tilt-glass/
-  index.html            Start, Auswahl, Host, Spiele
-  controller.html       reiner Neigungs-Controller (braucht js-Ordner)
-  controller-standalone.html  Controller als EINE Datei (fürs Handy)
-  index-standalone.html       Hauptgerät als EINE Datei (optional)
-  build-standalone.js   erzeugt die Standalone-Dateien (Entwickler)
-  styles.css            Minimal-Glass-Design
-  js/store.js           Bestwerte + Einstellungen
-  js/tilt.js            Kalibrierung, Filter, Fallbacks
-  js/net.js             manuelles WebRTC (Offline-Fallback)
-  js/net-auto.js        Auto-Pairing per 4-stelligem Code
-  js/engine3d.js        eigene 3D-Engine (Projektion, Meshes, Licht, Nebel)
-  js/sfx.js             Synth-Sound (WebAudio, keine Dateien)
-  js/game-drive.js      Apex Drive (3D-Segment-Racer)
-  js/game-sky.js        Skybound (3D-Flug, Ringe + Combo)
-  js/game-tunnel.js     Vortex (3D-Röhrenflug)
-  js/game-balance.js    Slackline (3D-Balance, Münzen, Böen)
-  js/game-runner.js     Starfall (3D-Asteroiden, Schild)
-  js/app.js             Navigation + HUD
-  server/lan-server.js  alt, wird nicht mehr benötigt
-```
-  styles.css            Minimal-Glass-Design
-  js/store.js           Bestwerte + Einstellungen
-  js/tilt.js            Kalibrierung, Filter, Fallbacks
-  js/net.js             manuelles WebRTC (Offline-Fallback)
-  js/net-auto.js        Auto-Pairing per 4-stelligem Code
-  js/game-drive.js      Endless Drive (Pseudo-3D)
-  js/game-sky.js        Sky Dodge
-  js/game-tunnel.js     Tunnel Drift
-  js/game-balance.js    Balance
-  js/game-runner.js     Star Drift (Bonus)
-  js/app.js             Navigation + HUD
-  server/lan-server.js  alt, wird nicht mehr benötigt
+  index-standalone.html            Start, Auswahl, Host, Spiele (fürs erstgerät)
+  controller-standalone.html  Controller als EINE Datei (fürs zweitgerät)
 ```
 
 ## Steuerung
