@@ -733,6 +733,27 @@ details.manual summary:hover{color:var(--ink)}
     });
   }
 
+  /* Parallel zu ALLEN Vermittlungsservern verbinden: Host und Controller treffen sich so garantiert
+     auf mindestens einem, auch wenn ein Server auf einem Gerät langsam/blockiert ist. */
+  function mqttConnectAll(urls,cid,topic){
+    return new Promise(function(resolve,reject){
+      var links=[],pending=urls.length,resolved=false;
+      var combo={closed:false,url:'',
+        publish:function(t,o,r){ links.slice().forEach(function(l){ l.publish(t,o,r); }); },
+        clear:function(t){ links.slice().forEach(function(l){ l.clear(t); }); },
+        close:function(){ combo.closed=true; links.slice().forEach(function(l){ l.close(); }); }};
+      urls.forEach(function(u,idx){
+        mqttConnect([u],cid+'-'+idx,topic).then(function(l){
+          if(combo.closed){ l.close(); return; }
+          links.push(l);
+          l.onpublish=function(t,msg){ if(combo.onpublish) combo.onpublish(t,msg); };
+          l.onclose=function(){ var k=links.indexOf(l); if(k>=0) links.splice(k,1); if(!links.length&&!combo.closed&&combo.onclose) combo.onclose(); };
+          if(!resolved){ resolved=true; combo.url=u; resolve(combo); }
+        }).catch(function(){ if(--pending===0&&!resolved) reject(new Error('Kein Vermittlungsserver erreichbar. Internet prüfen.')); });
+      });
+    });
+  }
+
   /* ---------- Auto-Pairing ---------- */
   var NetAuto={
     brokers:BROKERS,
@@ -781,7 +802,7 @@ details.manual summary:hover{color:var(--ink)}
       .then(function(){
         if(closed) return;
         var offer=JSON.parse(JSON.stringify(pc.localDescription));
-        mqttConnect(BROKERS,cid,topic).then(function(l){
+        mqttConnectAll(BROKERS,cid,topic).then(function(l){
           if(closed){ l.close(); return; }
           link=l;
           l.onpublish=function(t,msg){
@@ -825,7 +846,7 @@ details.manual summary:hover{color:var(--ink)}
         isOpen:function(){ return !!(ch&&ch.readyState==='open'); }
       };
       if(!code){ st('error'); return handle; }
-      mqttConnect(BROKERS,cid,topic).then(function(l){
+      mqttConnectAll(BROKERS,cid,topic).then(function(l){
         if(closed){ l.close(); return; }
         link=l;
         st('waiting'); lg('Vermittlung ok ('+shortBroker(l.url)+'), suche Code …');
