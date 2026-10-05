@@ -1,8 +1,8 @@
 # Tilt Glass — Spielen durch Neigen
 
-Sammlung endloser Spiele, gesteuert ausschließlich durch Geräte-Neigung.
+Sammlung endloser Spiele, gesteuert ausschließlich durch Geräte-Neigung. Kein Build, keine Dependencies, kein Terminal nötig.
 
-## Schnellstart (ein Gerät):
+## Schnellstart (ein Gerät)
 
 1. `tilt-glass/index.html` im Browser öffnen (Doppelklick genügt).
 2. Auf dem Handy: **Sensor erlauben** (nur iOS), Gerät in neutrale Haltung bringen, **Neigung kalibrieren**.
@@ -11,17 +11,11 @@ Sammlung endloser Spiele, gesteuert ausschließlich durch Geräte-Neigung.
 
 Alle Einstellungen und Bestwerte bleiben in `localStorage` gespeichert.
 
-## Modus 2: Hauptgerät + Handy als Controller
+## Modus 2: Hauptgerät + Handy als Controller (ultra einfach)
 
-Auf 1. Gerät:
-https://Ilikeducks42.github.io/tilt/index-standalone.html
+Kein Terminal, kein lokaler Server, keine IP-Adressen, kein langes Abtippen:
 
-Auf 2. Gerät:
-https://Ilikeducks42.github.io/tilt/controller-standalone.html
-
-**ODER**:
-
-1. **Controller aufs Handy bringen (eine Datei genügt):** Dort im Browser öffnen.
+1. **Controller aufs Handy bringen (eine Datei genügt):** Schicke die Datei `controller-standalone.html` aufs Handy (WhatsApp, USB, E-Mail — sie enthält alles, kein Ordner nötig). Dort im Browser öffnen.
    - Erscheint oben eine **rote Box**, ist die Datei unvollständig — dann erneut die Standalone-Datei übertragen.
 2. Hauptgerät (PC): `index.html` → **Externer Controller** → **Code erzeugen** (4-stellig, z. B. 4821).
 3. Beide Geräte ins **gleiche WLAN**.
@@ -29,7 +23,7 @@ https://Ilikeducks42.github.io/tilt/controller-standalone.html
 
 Unter dem Code-Feld läuft ein kleines **Diagnose-Protokoll** mit (z. B. „Vermittlung ok, Code aktiv“ → „Code gefunden“ → „Direktverbindung steht“). Bleibt es hängen, steht dort auch die Ursache.
 
-Technik: Die Code-Vermittlung läuft einmalig über einen öffentlichen Rendezvous-Punkt (Internet nötig). Die Neigung selbst läuft danach direkt Peer-to-Peer per WebRTC (ca. 40 Pakete/s). Klappt die direkte Verbindung nicht, wird automatisch ein Relay-Server benutzt. Ganz ohne Internet geht es per „Code kopieren (Fallback)“.
+Technik: Die Code-Vermittlung läuft einmalig über einen öffentlichen Rendezvous-Punkt (Internet nötig). Die Neigung selbst läuft danach direkt Peer-to-Peer per WebRTC (ca. 40 Pakete/s). Klappt die direkte Verbindung nicht (z. B. Gast-WLAN mit Geräte-Isolation), wird automatisch ein Relay-Server benutzt. Ganz ohne Internet geht es per „Code kopieren (Fallback)“.
 
 ## Wenn es nicht klappt
 
@@ -41,7 +35,9 @@ Technik: Die Code-Vermittlung läuft einmalig über einen öffentlichen Rendezvo
 | „Direktverbindung blockiert“ | WLAN isoliert Geräte (Gast-WLAN!) → normales Heim-WLAN nutzen |
 | Datei `controller.html` statt Standalone | funktioniert nur mit dem `js`-Ordner daneben |
 
-## Spiele
+Die Ein-Datei-Versionen werden aus den Quellen erzeugt (`node build-standalone.js`, nur für Entwickler nötig).
+
+## Spiele (alle echtes 3D, eigene Engine, keine Libraries)
 
 - **Apex Drive** — 3D-Rennen mit Kurven und Hügeln, Verkehr, 4 Tageszonen (Tag, Wüste, Sunset, Nacht mit Scheinwerfern). Dicht auffahren gibt Combo-Bonus.
 - **Skybound** — 3D-Flug durch Ringe (Combo-System), rote Barrieren meiden, türkise Tore geben Boost.
@@ -49,12 +45,44 @@ Technik: Die Code-Vermittlung läuft einmalig über einen öffentlichen Rendezvo
 - **Slackline** — 3D-Balance auf schwebendem Band mit Münzen, Böen-Warnung und Kanten-Alarm.
 - **Starfall** — 3D-Asteroidengürtel mit rotierenden Felsen, Energie-Orbs und Schild-Pickup (rettet einmal).
 
+Dazu: synthetisierte Sound-Effekte (WebAudio, keine Dateien), Partikel, Screen-Shake, Nebel und dynamische Kamera. Bestwerte bleiben pro Spiel lokal gespeichert.
+
 ## Dateien
 
 ```
 tilt-glass/
-  index-standalone.html            Start, Auswahl, Host, Spiele (fürs erstgerät)
-  controller-standalone.html  Controller als EINE Datei (fürs zweitgerät)
+  index.html            Start, Auswahl, Host, Spiele
+  controller.html       reiner Neigungs-Controller (braucht js-Ordner)
+  controller-standalone.html  Controller als EINE Datei (fürs Handy)
+  index-standalone.html       Hauptgerät als EINE Datei (optional)
+  build-standalone.js   erzeugt die Standalone-Dateien (Entwickler)
+  styles.css            Minimal-Glass-Design
+  js/store.js           Bestwerte + Einstellungen
+  js/tilt.js            Kalibrierung, Filter, Fallbacks
+  js/net.js             manuelles WebRTC (Offline-Fallback)
+  js/net-auto.js        Auto-Pairing per 4-stelligem Code
+  js/engine3d.js        eigene 3D-Engine (Projektion, Meshes, Licht, Nebel)
+  js/sfx.js             Synth-Sound (WebAudio, keine Dateien)
+  js/game-drive.js      Apex Drive (3D-Segment-Racer)
+  js/game-sky.js        Skybound (3D-Flug, Ringe + Combo)
+  js/game-tunnel.js     Vortex (3D-Röhrenflug)
+  js/game-balance.js    Slackline (3D-Balance, Münzen, Böen)
+  js/game-runner.js     Starfall (3D-Asteroiden, Schild)
+  js/app.js             Navigation + HUD
+  server/lan-server.js  alt, wird nicht mehr benötigt
+```
+  styles.css            Minimal-Glass-Design
+  js/store.js           Bestwerte + Einstellungen
+  js/tilt.js            Kalibrierung, Filter, Fallbacks
+  js/net.js             manuelles WebRTC (Offline-Fallback)
+  js/net-auto.js        Auto-Pairing per 4-stelligem Code
+  js/game-drive.js      Endless Drive (Pseudo-3D)
+  js/game-sky.js        Sky Dodge
+  js/game-tunnel.js     Tunnel Drift
+  js/game-balance.js    Balance
+  js/game-runner.js     Star Drift (Bonus)
+  js/app.js             Navigation + HUD
+  server/lan-server.js  alt, wird nicht mehr benötigt
 ```
 
 ## Steuerung
