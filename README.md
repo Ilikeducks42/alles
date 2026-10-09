@@ -18,6 +18,11 @@
 *Tomaten, Eier, Kuchen und Farbe in dein Umfeld werfen.*
 
 ##  Node Whiteboard
-<https://ilikeducks42.github.io/alles/Wirfsievoll.html>
+<https://ilikeducks42.github.io/alles/node-whiteboard.html>
 
 *Nodes verbinden und Algorithmen bauen.*
+
+##  Word Crypt
+<https://ilikeducks42.github.io/alles/wort-crypt.html>
+
+*Verschlüssle Text und bilder mit einem Keywort als Schlüssel.*
