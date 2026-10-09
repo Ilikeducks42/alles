@@ -16,3 +16,8 @@
 <https://ilikeducks42.github.io/alles/Wirfsievoll.html>
 
 *Tomaten, Eier, Kuchen und Farbe in dein Umfeld werfen.*
+
+##  Node Whiteboard
+<https://ilikeducks42.github.io/alles/Wirfsievoll.html>
+
+*Nodes verbinden und Algorithmen bauen.*
