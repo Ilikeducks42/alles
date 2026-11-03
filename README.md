@@ -26,3 +26,13 @@
 <https://ilikeducks42.github.io/alles/wort-crypt.html>
 
 *Verschlüssle Text und bilder mit einem Keywort als Schlüssel.*
+
+## Soniclink
+<https://ilikeducks42.github.io/alles/soniclink.html>
+
+*Übertrage Text über Tonsignale an ein Anderes Gerät.*
+
+## Aerodynamik
+<https://ilikeducks42.github.io/alles/aerodynamik.html>
+
+*Simuliere den Windstrom um ein 2D Objekt.*
