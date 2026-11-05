@@ -93,7 +93,7 @@
   @keyframes rise{from{opacity:0;transform:translateY(12px)}}
   #none{margin:auto;animation:rise .4s ease both}
   #none.hidden{display:none}
-  .pulse{width:10px;height:10px;border-radius:50%;background:#2e2e2e;margin:64px auto 0;animation:pulse 1.2s ease infinite}
+  .pulse{width:10px;height:10px;border-radius:50%;background:#2e2e2e;margin:64px auto 14px;animation:pulse 1.2s ease infinite}\n  .none-label{text-align:center;color:var(--dim);font-size:13px}
   @keyframes pulse{50%{opacity:.15;transform:scale(.75)}}
 
   /* ---------- Chat ---------- */
@@ -234,7 +234,7 @@
     <div class="join">
       <code>Code</code>
       <div class="join-row">
-        <input id="code" inputmode="latin" autocomplete="off" spellcheck="false" maxlength="6" placeholder="· · · · ·">
+        <input id="code" inputmode="latin" autocomplete="off" spellcheck="false" maxlength="5" placeholder="· · · · ·">
         <button id="btn-join" aria-label="Beitreten">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
@@ -257,7 +257,7 @@
     </button>
   </header>
   <div id="rooms"></div>
-  <div id="none" class="hidden"><div class="pulse"></div></div>
+  <div id="none" class="hidden"><div class="pulse"></div><div class="none-label">Suche…</div></div>
 </div>
 
 <!-- ======== CHAT ======== -->
@@ -412,15 +412,28 @@ async function waitBuffer(){
 }
 
 function setupConn(conn, relay){
-  conns.set(conn.connectionId, conn);
-  updateStatus();
+  let activated = false;
+  const activate = () => {
+    if (activated) return;
+    activated = true;
+    conns.set(conn.connectionId, conn);
+    killEmpty();
+    updateStatus();
+  };
+  conn.on('open', activate);
+  if (conn.open) activate();
+
   conn.on('data', d => {
     handleData(conn, d);
     if (relay) enqueue(d instanceof ArrayBuffer ? {chunk:d} : {payload:d}, conn.connectionId);
   });
-  conn.on('close', () => { conns.delete(conn.connectionId); cleanupInbound(conn); updateStatus(); });
-  conn.on('error', () => { conns.delete(conn.connectionId); cleanupInbound(conn); updateStatus(); });
-  killEmpty();
+  const remove = () => {
+    conns.delete(conn.connectionId);
+    cleanupInbound(conn);
+    updateStatus();
+  };
+  conn.on('close', remove);
+  conn.on('error', remove);
 }
 function updateStatus(){
   const on = conns.size > 0;
@@ -578,11 +591,11 @@ function startHost(open){
     console.log('[p2p] host open:', id, 'code:', code);
     $('#roomcode').textContent = code.split('').join(' ');
     enterChat();
-    if (openRoom){ regTick(); regTimer = setInterval(regTick, 8000); }
+    if (openRoom){ regTick(); lobbyRegTimer = setInterval(regTick, 8000); }
   });
   peer.on('connection', conn => { console.log('[p2p] incoming conn'); setupConn(conn, true); });
   peer.on('error', e => {
-    if (e.type === 'unavailable-id'){ stopReg(); return startHost(open); }
+    if (e.type === 'unavailable-id'){\n      stopReg();\n      try { peer && peer.destroy(); } catch(_) {}\n      peer = null;\n      return startHost(open);\n    }
     if (e.type === 'peer-unavailable') return; // Lobby-Sonden
     toast(e.type.replace(/-/g,' '));
   });
@@ -702,7 +715,7 @@ function registerClient(slot){
 
 function stopReg(){
   openRoom = false;
-  clearInterval(lobbyRegTimer); lobbyRegTimer = null;
+  if (lobbyRegTimer) clearInterval(lobbyRegTimer); lobbyRegTimer = null;
   if (lobbyReg){ try{ lobbyReg.close(); }catch(_){} lobbyReg = null; }
   if (lobbyMaster){ try{ lobbyMaster.destroy(); }catch(_){} lobbyMaster = null; }
   lobbyRooms = new Map();
@@ -717,7 +730,10 @@ function openDiscover(){
 }
 
 function setScanning(on){
-  $('#none').classList.toggle('hidden', !on);
+  const empty = $('#none');
+  empty.classList.toggle('hidden', !on);
+  const label = empty.querySelector('.none-label');
+  if (label) label.textContent = on ? 'Suche…' : 'Keine Räume gefunden';
   if (on) renderRooms([]);
 }
 
@@ -772,11 +788,11 @@ function renderRooms(codes){
     b.style.setProperty('--i', i);
     b.innerHTML = `<code></code><span class="live"></span>`;
     b.querySelector('code').textContent = code.split('').join(' ');
-    b.onclick = () => { toast(code); join(code); };
+    b.onclick = () => join(code);
     el.appendChild(b);
   });
-  if (codes.length) { $('#none').classList.add('hidden'); }
-  else if (!$('#none').classList.contains('hidden')) $('#none').classList.remove('hidden');
+  $('#none').classList.toggle('hidden', codes.length > 0);
+  if (!codes.length) { const label = $('#none .none-label'); if (label) label.textContent = 'Keine Räume gefunden'; }
 }
 
 /* ================= events ================= */
@@ -799,7 +815,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
 
 $('#btn-join').onclick = () => {
   const code = $('#code').value.trim().toUpperCase();
-  if (code.length < 4){ $('#home-error').textContent = 'code?'; return; }
+  if (!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}$/.test(code)){ $('#home-error').textContent = 'Bitte einen gültigen 5-stelligen Code eingeben.'; return; }
   $('#home-error').textContent = '';
   join(code);
 };
@@ -837,7 +853,7 @@ function submitText(){
   t.value = '';
 }
 $('#btn-send').onclick = submitText;
-$('#text').addEventListener('keydown', e => { if (e.key === 'Enter') submitText(); });
+$('#text').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); submitText(); } });
 
 $('#btn-file').onclick = () => $('#file').click();
 $('#file').addEventListener('change', () => {
