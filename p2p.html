@@ -93,7 +93,8 @@
   @keyframes rise{from{opacity:0;transform:translateY(12px)}}
   #none{margin:auto;animation:rise .4s ease both}
   #none.hidden{display:none}
-  .pulse{width:10px;height:10px;border-radius:50%;background:#2e2e2e;margin:64px auto 14px;animation:pulse 1.2s ease infinite}\n  .none-label{text-align:center;color:var(--dim);font-size:13px}
+  .pulse{width:10px;height:10px;border-radius:50%;background:#2e2e2e;margin:64px auto 14px;animation:pulse 1.2s ease infinite}
+  .none-label{text-align:center;color:var(--dim);font-size:13px}
   @keyframes pulse{50%{opacity:.15;transform:scale(.75)}}
 
   /* ---------- Chat ---------- */
@@ -595,7 +596,12 @@ function startHost(open){
   });
   peer.on('connection', conn => { console.log('[p2p] incoming conn'); setupConn(conn, true); });
   peer.on('error', e => {
-    if (e.type === 'unavailable-id'){\n      stopReg();\n      try { peer && peer.destroy(); } catch(_) {}\n      peer = null;\n      return startHost(open);\n    }
+    if (e.type === 'unavailable-id'){
+      stopReg();
+      try { peer && peer.destroy(); } catch(_) {}
+      peer = null;
+      return startHost(open);
+    }
     if (e.type === 'peer-unavailable') return; // Lobby-Sonden
     toast(e.type.replace(/-/g,' '));
   });
