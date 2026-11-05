@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="P2P">
+<title>P2P</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  :root{
+    --bg:#000;
+    --panel:#0c0c0c;
+    --line:#1e1e1e;
+    --txt:#fafafa;
+    --dim:#8a8a8a;
+    --accent:#1d3a5f;
+    --accent-hi:#27507f;
+    --green:#3ecf8e;
+    --amber:#e6b34d;
+    --red:#e05252;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    touch-action:manipulation;overflow:hidden;
+  }
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+  input{font:inherit;color:inherit;background:none;border:0;outline:none}
+  svg{display:block}
+
+  /* ---------- Screens + Transitions ---------- */
+  .screen{
+    position:fixed;inset:0;display:flex;flex-direction:column;
+    opacity:0;transform:translateY(18px) scale(.99);visibility:hidden;pointer-events:none;
+    transition:opacity .32s ease,transform .4s cubic-bezier(.2,.8,.25,1),visibility 0s .4s;
+  }
+  .screen.active{
+    opacity:1;transform:none;visibility:visible;pointer-events:auto;
+    transition:opacity .32s ease,transform .4s cubic-bezier(.2,.8,.25,1),visibility 0s 0s;
+  }
+  .hidden{display:none!important}
+
+  /* ---------- Home ---------- */
+  #home{align-items:center;justify-content:center;gap:clamp(48px,11vh,110px);padding:0 32px}
+  .mark h1{margin:0;font-size:clamp(38px,7vw,52px);font-weight:200;letter-spacing:.35em;text-indent:.35em}
+  .home-actions{display:flex;flex-direction:column;align-items:center;gap:52px;width:100%;max-width:340px}
+  #btn-create{
+    width:100%;padding:18px 0;border-radius:999px;background:var(--txt);color:#000;
+    font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    transition:transform .15s ease, background .15s ease;
+  }
+  #btn-create:active{transform:scale(.97);background:#d9d9d9}
+  .join{width:100%;display:flex;flex-direction:column;align-items:center;gap:18px}
+  .join code{font-size:12px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase}
+  .join-row{display:flex;width:100%;gap:10px}
+  #code{
+    flex:1;min-width:0;text-align:center;letter-spacing:.45em;text-indent:.45em;
+    font-size:22px;padding:14px 0;border-radius:14px;border:1px solid var(--line);background:var(--panel);
+    text-transform:uppercase;
+  }
+  #code::placeholder{letter-spacing:.2em;text-indent:0;font-size:14px;color:#4a4a4a}
+  #btn-join{
+    width:56px;border-radius:14px;background:var(--accent);display:grid;place-items:center;flex:none;
+    transition:background .15s ease,transform .1s ease;
+  }
+  #btn-join:active{transform:scale(.94)}
+  #btn-join:hover{background:var(--accent-hi)}
+  #btn-discover{color:var(--dim);font-size:13px;padding:6px 4px;transition:color .15s}
+  #btn-discover:hover{color:var(--txt)}
+  #home-error{min-height:20px;color:var(--dim);font-size:13px;text-align:center}
+
+  /* ---------- Discover ---------- */
+  #discover{background:var(--bg)}
+  #rooms{flex:1;overflow-y:auto;padding:20px 24px calc(env(safe-area-inset-bottom) + 20px);
+    display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent}
+  .room{
+    display:flex;align-items:center;gap:16px;width:100%;text-align:left;
+    padding:20px 22px;border-radius:16px;border:1px solid var(--line);background:var(--panel);
+    animation:rise .4s cubic-bezier(.2,.8,.25,1) both;animation-delay:calc(var(--i)*45ms);
+    transition:transform .15s ease,border-color .15s ease;
+  }
+  .room:hover{border-color:#333}
+  .room:active{transform:scale(.98)}
+  .room code{font-size:20px;font-weight:600;letter-spacing:.28em;flex:1;min-width:0;text-transform:uppercase}
+  .room .live{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}}
+  #none{margin:auto;animation:rise .4s ease both}
+  #none.hidden{display:none}
+  .pulse{width:10px;height:10px;border-radius:50%;background:#2e2e2e;margin:64px auto 0;animation:pulse 1.2s ease infinite}
+  @keyframes pulse{50%{opacity:.15;transform:scale(.75)}}
+
+  /* ---------- Chat ---------- */
+  #chat{background:var(--bg)}
+  header{
+    display:flex;align-items:center;gap:10px;
+    padding:calc(env(safe-area-inset-top) + 14px) 20px 14px;border-bottom:1px solid var(--line);
+    flex:none;
+  }
+  #status{width:9px;height:9px;border-radius:50%;background:var(--amber);flex:none;transition:background .3s;margin:0 4px}
+  #status.on{background:var(--green)}
+  #status.off{background:var(--red)}
+  .code-wrap{display:flex;align-items:center;flex:1;min-width:0;gap:2px}
+  #roomcode{font-size:15px;letter-spacing:.3em;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .iconbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--dim);flex:none;transition:color .15s,background .15s}
+  .iconbtn:hover{color:var(--txt);background:var(--panel)}
+  .iconbtn.sm{width:36px;height:36px;margin-left:4px}
+
+  #msgs{flex:1;overflow-y:auto;padding:24px 20px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent}
+  #msgs::-webkit-scrollbar{width:4px}
+  #msgs::-webkit-scrollbar-thumb{background:#262626;border-radius:2px}
+
+  .row{display:flex;width:100%;animation:pop .28s cubic-bezier(.2,.8,.25,1) both}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}}
+  .row.out{justify-content:flex-end}
+  .bubble{max-width:78%;padding:12px 16px;border-radius:var(--radius);font-size:15px;line-height:1.45;word-break:break-word}
+  .row.in .bubble{background:var(--panel);border:1px solid var(--line);border-top-left-radius:6px}
+  .row.out .bubble{background:#f2f2f2;color:#000;border-top-right-radius:6px}
+
+  .empty{margin:auto;text-align:center;color:#3d3d3d}
+  .empty svg{margin:0 auto 18px;opacity:.5}
+
+  /* file bubble */
+  .bubble.file{display:flex;flex-direction:column;gap:10px;min-width:230px}
+  .file-top{display:flex;align-items:center;gap:12px}
+  .file-ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex:none;background:rgba(255,255,255,.06)}
+  .row.out .file-ic{background:rgba(0,0,0,.06)}
+  .file-meta{min-width:0;flex:1}
+  .file-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .file-size{font-size:11.5px;color:var(--dim);margin-top:2px}
+  .row.out .file-size{color:#7d7d7d}
+  .bar{height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
+  .row.out .bar{background:rgba(0,0,0,.1)}
+  .bar i{display:block;height:100%;width:0;border-radius:2px;background:var(--txt);transition:width .2s linear}
+  .row.out .bar i{background:#000}
+  .bar-sub{display:flex;justify-content:space-between;font-size:11px;color:var(--dim)}
+  .row.out .bar-sub{color:#7d7d7d}
+
+  /* bottom bar */
+  footer{
+    flex:none;display:flex;align-items:flex-end;gap:6px;
+    padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);
+    border-top:1px solid var(--line);background:var(--bg);
+  }
+  #text{
+    flex:1;min-width:0;padding:13px 18px;border-radius:999px;background:var(--panel);
+    border:1px solid var(--line);font-size:16px;
+  }
+  #text::placeholder{color:#4a4a4a}
+  #btn-file{color:var(--dim);transition:opacity .2s ease}
+  #btn-file:disabled{opacity:.35;cursor:default}
+  #btn-send{
+    width:46px;height:46px;border-radius:50%;background:var(--accent);color:#fff;
+    display:grid;place-items:center;flex:none;transition:transform .1s ease,background .15s ease,opacity .2s ease;
+  }
+  #btn-send:disabled{opacity:.35;cursor:default}
+  #btn-send:active{transform:scale(.9)}
+  #btn-send:hover{background:var(--accent-hi)}
+
+  /* ---------- Sheet (create) ---------- */
+  #backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:80;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  #backdrop.show{opacity:1;pointer-events:auto}
+  #sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:90;background:var(--panel);
+    border:1px solid var(--line);border-bottom:0;border-radius:28px 28px 0 0;
+    transform:translateY(103%);transition:transform .38s cubic-bezier(.2,.8,.25,1);
+    pointer-events:none;
+  }
+  #sheet.show{transform:none;pointer-events:auto}
+  #sheet .hand{width:38px;height:4px;border-radius:2px;background:#2b2b2b;margin:12px auto 4px}
+  .sheet-inner{padding:16px 24px calc(env(safe-area-inset-bottom) + 18px);display:flex;flex-direction:column;gap:18px}
+  .switch-row{display:flex;align-items:center;gap:16px;padding:6px 2px;cursor:pointer}
+  .switch-row span{flex:1;font-size:14px;color:var(--txt)}
+  .switch-row input{display:none}
+  .switch{position:relative;width:46px;height:28px;border-radius:999px;background:#232323;flex:none;transition:background .2s ease}
+  .switch::after{
+    content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+    background:#fff;transition:transform .22s cubic-bezier(.2,.8,.25,1);
+  }
+  .switch-row input:checked ~ .switch{background:var(--accent)}
+  .switch-row input:checked ~ .switch::after{transform:translateX(18px)}
+  #btn-confirm{
+    padding:16px 0;border-radius:999px;background:var(--txt);color:#000;text-align:center;
+    font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    transition:transform .15s ease,background .15s ease;
+  }
+  #btn-confirm:active{transform:scale(.97)}
+  @media (min-width:760px){
+    #sheet{left:50%;right:auto;width:400px;margin-left:-200px;border-radius:24px;border-bottom:1px solid var(--line);
+      bottom:auto;top:50%;transform:translateY(calc(-50% - 10px)) scale(.96);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.25,1),opacity .25s ease}
+    #sheet.show{transform:translateY(-50%);opacity:1;pointer-events:auto}
+    #sheet .hand{display:none}
+  }
+
+  /* drop hint */
+  #drop{
+    position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.72);
+    z-index:40;border:2px dashed #333;pointer-events:none;
+  }
+  #drop div{font-size:15px;letter-spacing:.25em;text-transform:uppercase;color:var(--dim)}
+
+  /* toast */
+  #toast{
+    position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);transform:translateX(-50%) translateY(12px);
+    background:var(--panel);border:1px solid var(--line);color:var(--txt);
+    padding:10px 22px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .25s,transform .25s;
+    pointer-events:none;z-index:60;white-space:nowrap;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (min-width:760px){
+    #chat{padding:0 max(24px,calc(50% - 380px))}
+    header{border-bottom:0}
+    .bubble{max-width:60%}
+  }
+</style>
+</head>
+<body>
+
+<!-- ======== HOME ======== -->
+<div id="home" class="screen active">
+  <div class="mark"><h1>P2P</h1></div>
+  <div class="home-actions">
+    <button id="btn-create">Erstellen</button>
+    <div class="join">
+      <code>Code</code>
+      <div class="join-row">
+        <input id="code" inputmode="latin" autocomplete="off" spellcheck="false" maxlength="6" placeholder="· · · · ·">
+        <button id="btn-join" aria-label="Beitreten">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <button id="btn-discover">Ohne Code fortfahren</button>
+    <div id="home-error"></div>
+  </div>
+</div>
+
+<!-- ======== DISCOVER ======== -->
+<div id="discover" class="screen">
+  <header>
+    <button class="iconbtn" id="btn-back" aria-label="Zurück">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div style="flex:1"></div>
+    <button class="iconbtn" id="btn-rescan" aria-label="Aktualisieren">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>
+    </button>
+  </header>
+  <div id="rooms"></div>
+  <div id="none" class="hidden"><div class="pulse"></div></div>
+</div>
+
+<!-- ======== CHAT ======== -->
+<div id="chat" class="screen">
+  <header>
+    <span id="status"></span>
+    <div class="code-wrap">
+      <div id="roomcode">— — — — —</div>
+      <button class="iconbtn sm" id="btn-copy" aria-label="Code kopieren">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="ic-copy"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="ic-check" class="hidden"><path d="M20 6 9 17l-5-5"/></svg>
+      </button>
+    </div>
+    <button class="iconbtn" id="btn-leave" aria-label="Verlassen">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+
+  <div id="msgs">
+    <div class="empty" id="empty">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+  </div>
+
+  <footer>
+    <button class="iconbtn" id="btn-file" aria-label="Datei senden" disabled>
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6M9.5 13.5 12 11l2.5 2.5"/></svg>
+    </button>
+    <input id="text" autocomplete="off" placeholder="…" enterkeyhint="send">
+    <button id="btn-send" aria-label="Senden" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V5M8 9l4-4 4 4"/><path d="M5 19h14"/></svg>
+    </button>
+    <input id="file" type="file" multiple hidden>
+  </footer>
+</div>
+
+<!-- ======== CREATE SHEET ======== -->
+<div id="backdrop"></div>
+<div id="sheet">
+  <div class="hand"></div>
+  <div class="sheet-inner">
+    <label class="switch-row">
+      <span>Für alle offen</span>
+      <input type="checkbox" id="openToggle">
+      <i class="switch"></i>
+    </label>
+    <button id="btn-confirm">Los</button>
+  </div>
+</div>
+
+<div id="drop" class="hidden"><div>Drop</div></div>
+<div id="toast"></div>
+
+<script>
+/* ================= utils ================= */
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmtSize = b => b < 1024 ? b+' B' : b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB';
+
+let toastT;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+function genCode(){
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = ''; for (let i=0;i<5;i++) s += abc[Math.floor(Math.random()*abc.length)];
+  return s;
+}
+
+/* ================= screens ================= */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === name));
+}
+const hoverable = matchMedia('(hover:hover)').matches;
+
+/* ================= PWA manifest with runtime-generated icon ================= */
+function injectManifest(){
+  const icon = size => {
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const x = c.getContext('2d');
+    x.fillStyle = '#000'; x.fillRect(0,0,size,size);
+    x.fillStyle = '#fff';
+    // 3×3-Punkte-Gitter = Verbunden-Geräte
+    [[.30,.30],[.50,.30],[.70,.30],
+     [.30,.50],[.50,.50],[.70,.50],
+     [.30,.70],[.50,.70],[.70,.70]].forEach(([px,py]) => {
+      x.beginPath(); x.arc(px*size, py*size, size*.055, 0, 7); x.fill();
+    });
+    return c.toDataURL('image/png');
+  };
+  const manifest = {
+    name:'P2P', short_name:'P2P', start_url:'.', display:'standalone',
+    background_color:'#000000', theme_color:'#000000',
+    icons:[{src:icon(192),sizes:'192x192',type:'image/png'},{src:icon(512),sizes:'512x512',type:'image/png'}]
+  };
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
+  document.head.appendChild(link);
+}
+injectManifest();
+
+/* ================= P2P room ================= */
+const CHUNK = 64 * 1024;
+const BUF_LIMIT = 1 << 20; // 1 MB soft cap
+
+let peer = null;
+let isHost = false;
+let myCode = '';
+let conns = new Map();      // connectionId -> DataConnection
+let outQueue = [];          // FIFO items: {payload} | {chunk: ArrayBuffer}
+let pumping = false;
+let inbound = new Map();    // connectionId -> current inbound file state
+
+/* --- queue pump: guarantees ordered, non-interleaved streams --- */
+function enqueue(item, exclude){ item.exclude = exclude; outQueue.push(item); pump(); }
+
+async function pump(){
+  if (pumping) return;
+  pumping = true;
+  while (outQueue.length){
+    if (!conns.size){ outQueue = []; break; }
+    const item = outQueue.shift();
+    await waitBuffer();
+    for (const c of conns.values()){
+      if (c.connectionId === item.exclude) continue;
+      try { item.chunk ? c.send(item.chunk) : c.send(item.payload); } catch(_){}
+    }
+  }
+  pumping = false;
+}
+
+function bufferedAmount(){
+  let max = 0;
+  for (const c of conns.values()) max = Math.max(max, c.dataChannel ? c.dataChannel.bufferedAmount : 0);
+  return max;
+}
+async function waitBuffer(){
+  for (let i=0; i<3000 && bufferedAmount() > BUF_LIMIT; i++) await sleep(25);
+}
+
+function setupConn(conn, relay){
+  conns.set(conn.connectionId, conn);
+  updateStatus();
+  conn.on('data', d => {
+    handleData(conn, d);
+    if (relay) enqueue(d instanceof ArrayBuffer ? {chunk:d} : {payload:d}, conn.connectionId);
+  });
+  conn.on('close', () => { conns.delete(conn.connectionId); cleanupInbound(conn); updateStatus(); });
+  conn.on('error', () => { conns.delete(conn.connectionId); cleanupInbound(conn); updateStatus(); });
+  killEmpty();
+}
+function updateStatus(){
+  const on = conns.size > 0;
+  const st = $('#status');
+  st.classList.toggle('on', on);
+  st.classList.toggle('off', !on);
+  $('#btn-send').disabled = !on;
+  $('#btn-file').disabled = !on;
+  if (!on) showEmpty();
+}
+function setStatus(cls){ $('#status').className = cls; }
+
+/* --- incoming data --- */
+function handleData(conn, d){
+  if (d instanceof ArrayBuffer){
+    const st = inbound.get(conn.connectionId);
+    if (st){ st.chunks.push(d); recvProgress(st, d.byteLength); }
+    return;
+  }
+  if (typeof d !== 'object' || d === null) return;
+  switch (d.t){
+    case 'txt': addText(d.v, true); break;
+    case 'fmeta': {
+      const st = { id:d.id, name:d.name||'datei', size:d.size, mime:d.mime||'',
+                   chunks:[], bytes:0, start:performance.now(), lastT:performance.now(), lastB:0,
+                   el:addFile('in', d.name||'datei', d.size) };
+      inbound.set(conn.connectionId, st);
+      break;
+    }
+    case 'fend': {
+      const st = inbound.get(conn.connectionId);
+      if (st && st.id === d.id) finishInbound(conn, st);
+      break;
+    }
+  }
+}
+function cleanupInbound(conn){ inbound.delete(conn.connectionId); }
+
+function recvProgress(st, bytes){
+  st.bytes += bytes;
+  const now = performance.now();
+  if (now - st.lastT > 300 && st.el.querySelector('.bar-sub span')){
+    const mbps = ((st.bytes - st.lastB) / 1048576) / ((now - st.lastT) / 1000);
+    const pct = st.size ? Math.min(100, st.bytes/st.size*100) : 0;
+    st.el.querySelector('.bar i').style.width = pct + '%';
+    st.el.querySelector('.bar-sub span').textContent = (isFinite(mbps) ? mbps : 0).toFixed(1) + ' MB/s';
+    st.lastT = now; st.lastB = st.bytes;
+  }
+}
+function finishInbound(conn, st){
+  const blob = new Blob(st.chunks, { type: st.mime || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  st.el.querySelector('.bar i').style.width = '100%';
+  st.el.querySelector('.bar-sub').innerHTML = `<span></span><span>${fmtSize(st.size)}</span>`;
+  setDownloadable(st, url, st.name);
+  inbound.delete(conn.connectionId);
+}
+function setDownloadable(st, url, name){
+  st.el.style.cursor = 'pointer';
+  st.el.title = name;
+  st.el.onclick = () => {
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+  };
+}
+
+/* --- outbound files --- */
+async function sendFile(file){
+  if (!conns.size) return;
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  const el = addFile('out', file.name, file.size);
+  const sub = el.querySelector('.bar-sub span');
+  const bar = el.querySelector('.bar i');
+  const start = performance.now();
+  let sent = 0, lastT = start, lastB = 0;
+
+  enqueue({payload:{t:'fmeta', id, name:file.name, size:file.size, mime:file.type}});
+
+  for (let off = 0; off < file.size; off += CHUNK){
+    const buf = await file.slice(off, off + CHUNK).arrayBuffer();
+    enqueue({chunk: buf});
+    sent += buf.byteLength;
+    const now = performance.now();
+    if (now - lastT > 300){
+      const mbps = ((sent - lastB)/1048576) / ((now - lastT)/1000);
+      bar.style.width = Math.min(100, sent/file.size*100) + '%';
+      if (sub) sub.textContent = (isFinite(mbps) ? mbps : 0).toFixed(1) + ' MB/s';
+      lastT = now; lastB = sent;
+    }
+  }
+  enqueue({payload:{t:'fend', id}});
+  bar.style.width = '100%';
+  el.querySelector('.bar-sub').innerHTML = `<span></span><span>${fmtSize(sent)}</span>`;
+}
+
+/* mehrere Dateien werden nacheinander gesendet, nie gemischt */
+let sendChain = Promise.resolve();
+function sendFiles(files){
+  for (const f of files) sendChain = sendChain.then(() => sendFile(f));
+}
+
+/* --- URI helpers --- */
+function hideEmpty(){ const e = $('#empty'); if (e) e.classList.remove('hidden'); }
+function showEmpty(){ const e = $('#empty'); if (e && !conns.size) e.classList.remove('hidden'); }
+function killEmpty(){ const e = $('#empty'); if (e) e.classList.add('hidden'); }
+
+function addText(v, incoming){
+  killEmpty();
+  const list = $('#msgs');
+  const row = document.createElement('div');
+  row.className = 'row ' + (incoming ? 'in' : 'out');
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = v;
+  row.appendChild(b);
+  list.appendChild(row);
+  list.scrollTop = list.scrollHeight;
+}
+
+function addFile(dir, name, size){
+  killEmpty();
+  const list = $('#msgs');
+  const row = document.createElement('div');
+  row.className = 'row ' + dir;
+  const b = document.createElement('div');
+  b.className = 'bubble file';
+  b.innerHTML = `
+    <div class="file-top">
+      <span class="file-ic">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${dir==='out'?'#000':'#fafafa'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6M9.5 13.5 12 11l2.5 2.5"/></svg>
+      </span>
+      <div class="file-meta">
+        <div class="file-name"></div>
+        <div class="file-size">${dir==='in' ? '' : fmtSize(size)}</div>
+      </div>
+    </div>
+    <div class="bar"><i></i></div>
+    <div class="bar-sub"><span></span><span>${fmtSize(size)}</span></div>`;
+  b.querySelector('.file-name').textContent = name;
+  row.appendChild(b);
+  list.appendChild(row);
+  list.scrollTop = list.scrollHeight;
+  return b;
+}
+
+/* ================= flows ================= */
+function reset(){ outQueue = []; }
+
+function startHost(open){
+  openRoom = !!open;
+  const code = genCode();
+  peer = new Peer('p2p-' + code.toLowerCase(), { debug:0 });
+  isHost = true; myCode = code;
+  peer.on('open', () => {
+    $('#roomcode').textContent = code.split('').join(' ');
+    enterChat();
+    if (openRoom){ regTick(); regTimer = setInterval(regTick, 8000); }
+  });
+  peer.on('connection', conn => setupConn(conn, true));
+  peer.on('error', e => {
+    if (e.type === 'unavailable-id'){ stopReg(); return startHost(open); }
+    if (e.type === 'peer-unavailable') return; // Lobby-Sonden
+    toast(e.type.replace(/-/g,' '));
+  });
+}
+
+function join(code){
+  peer = new Peer({ debug:0 });
+  isHost = false; myCode = code;
+  peer.on('open', () => {
+    const conn = peer.connect('p2p-' + code.toLowerCase(), { reliable:true });
+    conn.on('open', () => { clearTimeout(t0); setupConn(conn); $('#roomcode').textContent = code.split('').join(' '); enterChat(); });
+    const t0 = setTimeout(() => { if (!conns.size){ toast('offline'); teardown(); } }, 12000);
+  });
+  peer.on('error', e => {
+    if (e.type === 'peer-unavailable'){ toast('offline'); teardown(); }
+  });
+}
+
+function teardown(){
+  stopReg();
+  try { peer && peer.destroy(); } catch(_){}
+  peer = null; conns.clear(); inbound.clear(); reset();
+}
+
+function enterChat(){
+  go('chat');
+  updateStatus();
+  if (hoverable) $('#text').focus({preventScroll:true});
+}
+function leaveChat(){
+  teardown();
+  clearMsgs();
+  $('#roomcode').textContent = '— — — — —';
+  setStatus('');
+  go('home');
+}
+function clearMsgs(){
+  $('#msgs').innerHTML = '<div class="empty" id="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>';
+}
+
+/* ================= lobby: "Ohne Code" ================= */
+const LOBBY_N = 8;
+const lobbyId = i => 'p2p-lby-' + i;
+const ROOM_TTL = 40 * 1000;
+
+let openRoom = false;
+let lobbyMaster = null;      // dieser Client hält einen Lobby-Slot
+let lobbyRooms = new Map();  // code -> ts (nur als Master)
+let lobbyReg = null;         // Verbindung zur fremden Lobby
+let lobbyRegTimer = null;
+let lobbyI = 0;
+
+function regTick(){
+  if (!openRoom || !peer || !peer.open) return;
+  if (lobbyMaster){
+    if (lobbyMaster.open) lobbyRooms.set(myCode, Date.now());
+    else { try{ lobbyMaster.destroy(); }catch(_){} lobbyMaster = null; }
+    if (lobbyMaster) return;
+  }
+  if (lobbyReg && lobbyReg.open){
+    lobbyReg.send({t:'reg', code:myCode});
+    return;
+  }
+  const slot = (lobbyI++) % LOBBY_N;
+  regAttempts(slot);
+}
+
+/* erst selbst über einen Lobby-Slot versuchen, sonst dort als Client registrieren */
+function regAttempts(slot){
+  if (lobbyI % 3 === 0) return claimLobby(slot);
+  registerClient(slot);
+}
+
+function claimLobby(slot){
+  const mp = new Peer(lobbyId(slot), { debug:0 });
+  mp.on('open', () => { lobbyMaster = mp; serveLobby(mp); });
+  mp.on('error', e => {
+    if (e.type === 'unavailable-id'){ try{ mp.destroy(); }catch(_){} registerClient(slot); }
+  });
+}
+
+function serveLobby(mp){
+  lobbyRooms = new Map();
+  mp.on('connection', c => {
+    c.on('data', d => {
+      if (!d || typeof d !== 'object') return;
+      if (d.t === 'reg' && typeof d.code === 'string') lobbyRooms.set(d.code, Date.now());
+      if (d.t === 'list'){
+        pruneRooms();
+        c.send({t:'rooms', rooms:[...lobbyRooms].map(([code,ts]) => ({code,ts}))});
+      }
+    });
+  });
+}
+function pruneRooms(){
+  const now = Date.now();
+  for (const [code,ts] of lobbyRooms) if (now - ts > ROOM_TTL) lobbyRooms.delete(code);
+}
+
+function registerClient(slot){
+  if (!peer || !peer.open) return;
+  const old = lobbyReg;
+  if (old){ try{ old.close(); }catch(_){} }
+  const c = peer.connect(lobbyId(slot), {reliable:true});
+  lobbyReg = c;
+  c.on('open', () => c.send({t:'reg', code:myCode}));
+  c.on('close', () => { if (lobbyReg === c) lobbyReg = null; });
+  c.on('error', () => { if (lobbyReg === c) lobbyReg = null; });
+}
+
+function stopReg(){
+  openRoom = false;
+  clearInterval(lobbyRegTimer); lobbyRegTimer = null;
+  if (lobbyReg){ try{ lobbyReg.close(); }catch(_){} lobbyReg = null; }
+  if (lobbyMaster){ try{ lobbyMaster.destroy(); }catch(_){} lobbyMaster = null; }
+  lobbyRooms = new Map();
+}
+
+/* --- discovery screen --- */
+let scanPeer = null, scanSeq = 0;
+
+function openDiscover(){
+  go('discover');
+  scan();
+}
+
+function setScanning(on){
+  $('#none').classList.toggle('hidden', !on);
+  if (on) renderRooms([]);
+}
+
+async function scan(){
+  const seq = ++scanSeq;
+  setScanning(true);
+  const found = new Map();
+  if (scanPeer){ try{ scanPeer.destroy(); }catch(_){} scanPeer = null; }
+  const sp = new Peer({debug:0});
+  scanPeer = sp;
+  const opened = new Promise(res => {
+    sp.on('open', res);
+    sp.on('error', () => res());
+    setTimeout(res, 4000);
+  });
+  await opened;
+  if (seq !== scanSeq) { try{sp.destroy();}catch(_){} return; }
+  await Promise.all(Array.from({length:LOBBY_N}, (_, i) => probeSlot(sp, i, found)));
+  if (seq !== scanSeq) { try{sp.destroy();}catch(_){} return; }
+  try{ sp.destroy(); }catch(_){}
+  if (scanPeer === sp) scanPeer = null;
+  setScanning(false);
+  renderRooms([...found.values()].sort((a,b) => a.ts - b.ts).map(r => r.code));
+}
+
+async function probeSlot(sp, i, found){
+  const c = sp.connect(lobbyId(i), {reliable:true, metadata:{scan:true}});
+  const opened = new Promise(res => { c.on('open', res); c.on('error', () => res()); setTimeout(res, 2500); });
+  await opened;
+  if (!c.open) return;
+  c.on('data', d => {
+    if (!d || d.t !== 'rooms' || !Array.isArray(d.rooms)) return;
+    const now = Date.now();
+    for (const r of d.rooms){
+      if (typeof r !== 'object' || typeof r.code !== 'string') continue;
+      if (r.code === myCode) continue; // eigenes Zimmer nicht listen
+      if (typeof r.ts === 'number' && now - r.ts > ROOM_TTL + 10000) continue;
+      found.set(r.code, {code:r.code, ts:r.ts || 0});
+    }
+  });
+  c.send({t:'list'});
+  await sleep(1200);
+  try{ c.close(); }catch(_){}
+}
+
+function renderRooms(codes){
+  const el = $('#rooms');
+  el.innerHTML = '';
+  codes.forEach((code, i) => {
+    const b = document.createElement('button');
+    b.className = 'room';
+    b.style.setProperty('--i', i);
+    b.innerHTML = `<code></code><span class="live"></span>`;
+    b.querySelector('code').textContent = code.split('').join(' ');
+    b.onclick = () => { toast(code); join(code); };
+    el.appendChild(b);
+  });
+  if (codes.length) { $('#none').classList.add('hidden'); }
+  else if (!$('#none').classList.contains('hidden')) $('#none').classList.remove('hidden');
+}
+
+/* ================= events ================= */
+$('#btn-create').onclick = () => {
+  $('#home-error').textContent = '';
+  $('#backdrop').classList.add('show');
+  $('#sheet').classList.add('show');
+};
+function closeSheet(){
+  $('#backdrop').classList.remove('show');
+  $('#sheet').classList.remove('show');
+}
+$('#backdrop').onclick = closeSheet;
+$('#btn-confirm').onclick = () => {
+  const open = $('#openToggle').checked;
+  closeSheet();
+  startHost(open);
+};
+addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+$('#btn-join').onclick = () => {
+  const code = $('#code').value.trim().toUpperCase();
+  if (code.length < 4){ $('#home-error').textContent = 'code?'; return; }
+  $('#home-error').textContent = '';
+  join(code);
+};
+$('#code').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btn-join').click(); });
+$('#code').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''); });
+
+$('#btn-discover').onclick = openDiscover;
+$('#btn-back').onclick = () => { clearRoomsScreen(); go('home'); };
+$('#btn-rescan').onclick = scan;
+
+function clearRoomsScreen(){
+  scanSeq++;
+  if (scanPeer){ try{ scanPeer.destroy(); }catch(_){} scanPeer = null; }
+  $('#rooms').innerHTML = '';
+  $('#none').classList.add('hidden');
+}
+
+$('#btn-leave').onclick = leaveChat;
+$('#btn-copy').onclick = async () => {
+  const ok = () => {
+    $('#ic-copy').classList.add('hidden');
+    $('#ic-check').classList.remove('hidden');
+    setTimeout(() => { $('#ic-check').classList.add('hidden'); $('#ic-copy').classList.remove('hidden'); }, 900);
+  };
+  try { await navigator.clipboard.writeText(myCode); toast(myCode); ok(); }
+  catch(_) { toast(myCode); }
+};
+
+function submitText(){
+  const t = $('#text');
+  const v = t.value.trim();
+  if (!v || !conns.size) return;
+  addText(v, false);
+  enqueue({payload:{t:'txt', v}});
+  t.value = '';
+}
+$('#btn-send').onclick = submitText;
+$('#text').addEventListener('keydown', e => { if (e.key === 'Enter') submitText(); });
+
+$('#btn-file').onclick = () => $('#file').click();
+$('#file').addEventListener('change', () => {
+  const files = [...$('#file').files];
+  $('#file').value = '';
+  if (files.length) sendFiles(files);
+});
+
+/* drag & drop */
+let dragDepth = 0;
+addEventListener('dragenter', e => { e.preventDefault(); if (++dragDepth) $('#drop').classList.remove('hidden'); });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('dragleave', e => { e.preventDefault(); if (--dragDepth <= 0){ dragDepth = 0; $('#drop').classList.add('hidden'); } });
+addEventListener('drop', e => {
+  e.preventDefault(); dragDepth = 0; $('#drop').classList.add('hidden');
+  if (!conns.size) return;
+  sendFiles(e.dataTransfer.files);
+});
+
+/* cleanup */
+addEventListener('beforeunload', () => { try{ stopReg(); }catch(_){} });
+</script>
+</body>
+</html>
