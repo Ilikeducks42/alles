@@ -367,6 +367,14 @@ injectManifest();
 /* ================= P2P room ================= */
 const CHUNK = 64 * 1024;
 const BUF_LIMIT = 1 << 20; // 1 MB soft cap
+const ICE = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+  ]
+};
 
 let peer = null;
 let isHost = false;
@@ -564,32 +572,40 @@ function reset(){ outQueue = []; }
 function startHost(open){
   openRoom = !!open;
   const code = genCode();
-  peer = new Peer('p2p-' + code.toLowerCase(), { debug:0 });
+  peer = new Peer('p2p-' + code.toLowerCase(), { debug:0, config: ICE });
   isHost = true; myCode = code;
-  peer.on('open', () => {
+  peer.on('open', id => {
+    console.log('[p2p] host open:', id, 'code:', code);
     $('#roomcode').textContent = code.split('').join(' ');
     enterChat();
     if (openRoom){ regTick(); regTimer = setInterval(regTick, 8000); }
   });
-  peer.on('connection', conn => setupConn(conn, true));
+  peer.on('connection', conn => { console.log('[p2p] incoming conn'); setupConn(conn, true); });
   peer.on('error', e => {
     if (e.type === 'unavailable-id'){ stopReg(); return startHost(open); }
     if (e.type === 'peer-unavailable') return; // Lobby-Sonden
     toast(e.type.replace(/-/g,' '));
   });
+  peer.on('disconnected', () => { console.warn('[p2p] host disconnected, reconnect'); try { peer.reconnect(); } catch(_){} });
 }
 
 function join(code){
-  peer = new Peer({ debug:0 });
+  console.log('[p2p] join code:', code, '-> peer id p2p-'+code.toLowerCase());
+  peer = new Peer({ debug:0, config: ICE });
   isHost = false; myCode = code;
-  peer.on('open', () => {
+  peer.on('open', id => {
+    console.log('[p2p] peer open:', id);
     const conn = peer.connect('p2p-' + code.toLowerCase(), { reliable:true });
-    conn.on('open', () => { clearTimeout(t0); setupConn(conn); $('#roomcode').textContent = code.split('').join(' '); enterChat(); });
-    const t0 = setTimeout(() => { if (!conns.size){ toast('offline'); teardown(); } }, 12000);
+    conn.on('open', () => { clearTimeout(t0); console.log('[p2p] conn open'); setupConn(conn); $('#roomcode').textContent = code.split('').join(' '); enterChat(); });
+    conn.on('error', e => { console.warn('[p2p] conn error:', e && e.type); toast('offline'); });
+    const t0 = setTimeout(() => { if (!conns.size){ console.warn('[p2p] join timeout'); toast('keine Verbindung'); teardown(); } }, 15000);
   });
   peer.on('error', e => {
-    if (e.type === 'peer-unavailable'){ toast('offline'); teardown(); }
+    console.warn('[p2p] peer error:', e && e.type);
+    if (e.type === 'peer-unavailable'){ toast('code?'); teardown(); }
+    else toast(e.type.replace(/-/g,' '));
   });
+  peer.on('disconnected', () => { console.warn('[p2p] peer disconnected'); peer.reconnect(); });
 }
 
 function teardown(){
@@ -648,7 +664,7 @@ function regAttempts(slot){
 }
 
 function claimLobby(slot){
-  const mp = new Peer(lobbyId(slot), { debug:0 });
+  const mp = new Peer(lobbyId(slot), { debug:0, config: ICE });
   mp.on('open', () => { lobbyMaster = mp; serveLobby(mp); });
   mp.on('error', e => {
     if (e.type === 'unavailable-id'){ try{ mp.destroy(); }catch(_){} registerClient(slot); }
@@ -710,7 +726,7 @@ async function scan(){
   setScanning(true);
   const found = new Map();
   if (scanPeer){ try{ scanPeer.destroy(); }catch(_){} scanPeer = null; }
-  const sp = new Peer({debug:0});
+  const sp = new Peer({debug:0, config: ICE});
   scanPeer = sp;
   const opened = new Promise(res => {
     sp.on('open', res);
