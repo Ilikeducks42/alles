@@ -29,15 +29,17 @@ footer input{flex:1;min-width:0}footer select{max-width:130px}
 #ov p{max-width:420px;color:var(--m);font-size:13px;margin:0}[hidden]{display:none!important}
 dialog{background:var(--s);color:var(--t);border:0;border-radius:18px;max-width:440px;width:92%;padding:18px}dialog::backdrop{background:#000a}
 dialog label{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0}dialog small{color:var(--m);display:block;font-size:12px;margin-top:8px}
+.tabs{display:flex;gap:4px;background:var(--s);border-radius:99px;padding:3px;margin:0 14px 6px;align-self:center}.tabs button{border:0;border-radius:99px;padding:6px 16px;background:none;color:var(--m)}.tabs button.on{background:var(--a);color:#07101d;font-weight:600}
 </style></head><body>
 <header><div class="logo">Sonic<span>Link</span></div><span id="st" class="pill"><i class="dot"></i>Mikro aus</span><span id="me" class="pill" title="Eigene Geräte-ID"></span><button id="gear" title="Einstellungen">⚙</button></header>
+<nav class="tabs"><button data-m="u" class="on">Ultraschall</button><button data-m="a">Hörbar</button></nav>
 <div id="chat"></div>
 <progress id="prog" hidden value="0" max="1"></progress><div id="info"></div>
 <details id="tech"><summary>Technik &amp; Diagnose</summary><canvas id="cv" width="640" height="120"></canvas><div class="g" id="gr"></div></details>
 <footer><select id="to"><option value="65535">Alle</option></select><input id="txt" placeholder="Nachricht…" maxlength="300" autocomplete="off"><button id="send" class="p">Senden</button><button id="cancel" hidden>✕</button></footer>
 <div id="ov"><div class="logo" style="font-size:30px;margin:0">Sonic<span>Link</span></div>
-<p>Textübertragung per Ultraschall (18–21,75 kHz, 16-FSK). Nur Lautsprecher &amp; Mikrofon, kein Netzwerk. Mikrofonfreigabe nötig (HTTPS oder localhost). Es folgt eine kurze Kalibrierung – bitte Lautstärke aufdrehen und ruhig bleiben.</p>
-<button id="go" class="p">Mikrofon aktivieren &amp; kalibrieren</button><p id="err" style="color:var(--er)"></p></div>
+<p>Textübertragung per Ton: Ultraschall (18–21,75 kHz) oder Hörbar (400–1000 Hz), jeweils 16-FSK mit einem Ton gleichzeitig. Nur Lautsprecher &amp; Mikrofon, kein Netzwerk. Mikrofonfreigabe nötig (HTTPS oder localhost). Es folgt eine kurze Kalibrierung – bitte Lautstärke aufdrehen und ruhig bleiben.</p>
+<nav class="tabs"><button data-m="u" class="on">Ultraschall</button><button data-m="a">Hörbar</button></nav><button id="go" class="p">Mikrofon aktivieren &amp; kalibrieren</button><p id="err" style="color:var(--er)"></p></div>
 <dialog id="set"><b>Einstellungen</b>
 <label>Lautstärke<input id="vol" type="range" min=".1" max="1" step=".05" value=".8"></label>
 <label>Geschwindigkeit<select id="spd"><option value="-1">Auto (adaptiv)</option><option value="0">40 ms/Symbol</option><option value="1">60 ms</option><option value="2">80 ms</option><option value="3">120 ms (robust)</option></select></label>
@@ -49,10 +51,12 @@ dialog label{display:flex;justify-content:space-between;align-items:center;gap:1
 <script>
 'use strict';
 const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rnd=(a,b)=>a+Math.random()*(b-a);
-const F0=18000,DF=250,NT=16,SYMH=[4,6,8,12],PRE=[0,15,0,15,0,15,0,15],BC=65535,BLK=12,NH=14,MAXP=40;
+const MODES={u:{id:'u',F0:18000,DF:250,S:[4,6,8,12],hs:.01,WN:2,PH:4,lo:17500,hi:22000},a:{id:'a',F0:400,DF:40,S:[7,9,12,18],hs:.005,WN:5,PH:8,lo:300,hi:1100}};
+let M=MODES.u,F0,DF,SYMH,PH,WN,OFF,src,node,zg;
+const NT=16,PRE=[0,15,0,15,0,15,0,15],BC=65535,BLK=12,NH=14,MAXP=40;
 const myId=(Math.random()*65533+1)|0,hex=n=>n.toString(16).toUpperCase().padStart(4,'0'),enc=new TextEncoder(),dec=new TextDecoder();
 let ctx,outGain,anal,hn,sr,curSrc,loop=false,txBusy=false,muteUntil=0,manual=-1,autoRate=1,streak=0,cancelled=false,beacons=true,mid=(Math.random()*256)|0;
-let cal=null;try{cal=JSON.parse(localStorage.getItem('sl'))}catch{}
+let cal=null;
 const ST={ok:0,fail:0,lat:[],rate:[],max:0,fOk:0,fBad:0,corr:0,bytes:0,inc:0};
 // ===== Fehlerkorrektur (Reed-Solomon RS(14,12) über GF(256), 1 Byte/Block korrigierbar) + CRC16 =====
 const EXP=new Uint8Array(512),LOG=new Uint8Array(256);
@@ -72,30 +76,30 @@ function unpack(b){const n=b[7];if(n>MAXP||b.length<10+n)return null;if(crc16(b,
 function toSyms(pkt,rate){const B=Math.ceil(pkt.length/BLK),d=new Uint8Array(B*BLK);d.set(pkt);const bl=[];
  for(let b=0;b<B;b++)bl.push(rsEnc(Array.from(d.subarray(b*BLK,(b+1)*BLK))));
  const s=[...PRE,rate,rate,rate,B,B,B];for(let i=0;i<B*NH;i++){const v=bl[i%B][(i/B)|0];s.push(v>>4,v&15)}return s}
-function synth(syms,hf){const hs=hn,lead=hs*10,ramp=Math.round(sr*.002);let tot=lead+hs*20;syms.forEach((_,i)=>tot+=hs*hf(i));
+function synth(syms,hf){const hs=hn,lead=Math.round(sr*.1),ramp=Math.round(sr*.002);let tot=lead+Math.round(sr*.2);syms.forEach((_,i)=>tot+=hs*hf(i));
  const o=new Float32Array(tot);let ph=0,pos=lead;
  syms.forEach((s,i)=>{const n=hs*hf(i),w=2*Math.PI*(F0+DF*s)/sr;for(let j=0;j<n;j++){const e=j<ramp?.5-.5*Math.cos(Math.PI*j/ramp):j>n-ramp?.5-.5*Math.cos(Math.PI*(n-j)/ramp):1;o[pos++]=Math.sin(ph)*e;ph+=w}});return o}
-const frameDur=(B,r)=>(32+24+B*NH*2*SYMH[r])*.01+.3;
+const frameDur=(B,r)=>(PH*14+B*NH*2*SYMH[r])*M.hs+.3;
 // ===== Audioausgabe =====
 function play(buf){return new Promise(res=>{const b=ctx.createBuffer(1,buf.length,sr);b.copyToChannel(buf,0);const s=ctx.createBufferSource();s.buffer=b;s.connect(outGain);curSrc=s;s.onended=()=>{curSrc=null;res()};s.start()})}
 // ===== Empfang: Goertzel-Filterbank, 20ms-Fenster, 10ms-Hop =====
 const WK=`class P extends AudioWorkletProcessor{constructor(o){super();this.n=o.processorOptions.n;this.b=new Float32Array(this.n);this.i=0}process(I){const x=I[0][0];if(x)for(let k=0;k<x.length;k++){this.b[this.i++]=x[k];if(this.i===this.n){this.port.postMessage(this.b.slice());this.i=0}}return true}}registerProcessor('p',P)`;
-let prev=null,hist=[],base=0,rxst=0,best=null,fr=null,noise=null,lastAct=0,calCol=null,cur={k:0,pk:0,tot:0},lastPkt='–',lastSnr=null,txPlan=null;
+let ring=[],hist=[],base=0,rxst=0,best=null,fr=null,noise=null,lastAct=0,calCol=null,cur={k:0,pk:0,tot:0},lastPkt='–',lastSnr=null,txPlan=null;
 const am=v=>{let m=0;for(let i=1;i<v.length;i++)if(v[i]>v[m])m=i;return m};
 function gz(w){const N=w.length,o=new Float64Array(NT);for(let k=0;k<NT;k++){const c=2*Math.cos(2*Math.PI*(F0+DF*k)/sr);let a=0,b=0;for(let i=0;i<N;i++){const t=w[i]+c*a-b;b=a;a=t}o[k]=4*(a*a+b*b-c*a*b)/(N*N)}return o}
-function onHop(c){if(!prev){prev=c;return}const w=new Float32Array(c.length*2);w.set(prev);w.set(c,c.length);prev=c;
+function onHop(c){ring.push(c);if(ring.length<WN)return;if(ring.length>WN)ring.shift();const w=new Float32Array(c.length*WN);ring.forEach((x,i)=>w.set(x,i*c.length));
  if((txBusy&&!loop)||performance.now()<muteUntil){hist.length=0;base=0;rxst=0;best=null;return}feed(gz(w))}
-function score(s){let sum=0;for(let k=0;k<8;k++){const v=hist[s-base+4*k+1],t=v.reduce((a,b)=>a+b,0)||1e-30,f=v[PRE[k]]/t;if(f<.4||v[PRE[k]]<noise*6)return 0;sum+=f}return sum/8}
-function symAt(st,S){const v=new Float64Array(NT);for(let o=1;o<=S-3;o++){const h=hist[st+o-base];if(h)for(let k=0;k<NT;k++)v[k]+=h[k]}return v}
+function score(s){let sum=0;for(let k=0;k<8;k++){const v=hist[s-base+PH*k+OFF],t=v.reduce((a,b)=>a+b,0)||1e-30,f=v[PRE[k]]/t;if(f<.4||v[PRE[k]]<noise*6)return 0;sum+=f}return sum/8}
+function symAt(st,S){const v=new Float64Array(NT);let lo=1,hi=S-WN-1;if(hi<lo){lo=0;hi=S-WN}for(let o=lo;o<=hi;o++){const h=hist[st+o-base];if(h)for(let k=0;k<NT;k++)v[k]+=h[k]}return v}
 const maj=(a,b,c)=>a===b||a===c?a:b===c?b:-1;
 function feed(P){if(calCol)calCol.push(P);hist.push(P);const n=base+hist.length,tot=P.reduce((a,b)=>a+b,0),pk=Math.max(...P);
  if(noise==null)noise=tot/NT+1e-12;const act=pk>noise*10&&pk>.35*tot;
  if(act)lastAct=performance.now();else if(!rxst)noise=noise*.97+tot/NT*.03;cur={k:am(P),pk,tot,act};
- if(rxst===0){const s=n-30;if(s>=base){const sc=score(s);if(sc>.6){if(!best||sc>best.sc)best={s,sc}}else if(best){fr={s:best.s};best=null;rxst=1}}
+ if(rxst===0){const s=n-(PH*7+OFF+1);if(s>=base){const sc=score(s);if(sc>.6){if(best)best.b=s;else best={a:s,b:s}}else if(best){fr={s:Math.round((best.a+best.b)/2)};best=null;rxst=1}}
   if(!rxst&&!best&&hist.length>100){hist.splice(0,50);base+=50}}
- else if(rxst===1&&n>fr.s+54){const y=[];for(let j=0;j<6;j++)y.push(am(symAt(fr.s+32+4*j,4)));const r=maj(y[0],y[1],y[2]),B=maj(y[3],y[4],y[5]);
-  if(r<0||r>3||B<1||B>5){ST.fBad++;lastPkt='Kopf ungültig';hist.splice(0,Math.min(hist.length,fr.s+32-base));base=Math.max(base,fr.s+32);rxst=0}
-  else{fr.r=r;fr.B=B;fr.S=SYMH[r];fr.ps=fr.s+56;fr.end=fr.ps+fr.S*B*NH*2;rxst=2}}
+ else if(rxst===1&&n>fr.s+PH*14){const y=[];for(let j=0;j<6;j++)y.push(am(symAt(fr.s+PH*8+PH*j,PH)));const r=maj(y[0],y[1],y[2]),B=maj(y[3],y[4],y[5]);
+  if(r<0||r>3||B<1||B>5){ST.fBad++;lastPkt='Kopf ungültig';{const k=Math.min(hist.length,Math.max(0,fr.s+PH*8-base));hist.splice(0,k);base+=k}rxst=0}
+  else{fr.r=r;fr.B=B;fr.S=SYMH[r];fr.ps=fr.s+PH*14;fr.end=fr.ps+fr.S*B*NH*2;rxst=2}}
  else if(rxst===2&&n>fr.end+1)finish()}
 function finish(){const{B,S,ps,r}=fr,bl=Array.from({length:B},()=>[]);let sn=0,sc=0;
  for(let i=0;i<B*NH;i++){let v=0;for(let h=0;h<2;h++){const q=symAt(ps+(2*i+h)*S,S),k=am(q);v=v<<4|k;sn+=Math.min(60,10*Math.log10(q[k]/((q.reduce((a,b)=>a+b,0)-q[k])/15+1e-30)));sc++}bl[i%B].push(v)}
@@ -120,7 +124,7 @@ function onPkt(p,snr,rate){if(p.src===myId&&!loop)return;
 let txq=Promise.resolve();const enqueue=f=>{const p=txq.then(f);txq=p.catch(()=>{});return p};
 const busy=()=>rxst!==0||performance.now()-lastAct<300;
 async function chan(prio,att){await sleep(prio===0?rnd(60,250):rnd(150,450)*(1<<Math.min(att,4)));let g=0;while(busy()&&g++<150)await sleep(rnd(120,400))}
-function tx(pkt,rate,prio,att=0){return enqueue(async()=>{if(!ctx)return;await chan(prio,att);const syms=toSyms(pkt,rate),hf=i=>i<14?4:SYMH[rate];
+function tx(pkt,rate,prio,att=0){return enqueue(async()=>{if(!ctx)return;await chan(prio,att);const syms=toSyms(pkt,rate),hf=i=>i<14?PH:SYMH[rate];
  const buf=synth(syms,hf);txPlan={t0:performance.now(),syms,rate};txBusy=true;try{await play(buf)}finally{txBusy=false;txPlan=null;muteUntil=performance.now()+350}})}
 function waitAck(src,id,i,ms){return new Promise(r=>{const k=`${src}:${id}:${i}`,t=setTimeout(()=>{acks.delete(k);r(false)},ms);acks.set(k,()=>{clearTimeout(t);acks.delete(k);r(true)})})}
 function rateFor(dst){if(manual>=0)return manual;let r=autoRate;const d=devs.get(dst);if(d&&d.snr!=null)r=Math.max(r,d.snr>=30?0:d.snr>=22?1:d.snr>=14?2:3);return r}
@@ -140,50 +144,59 @@ async function sendText(text,dst){const data=enc.encode(text);if(!data.length||!
 async function calibrate(){const info=$('info');info.textContent='Kalibrierung: Rauschpegel…';let ins=0,outs=0;
  try{const d=await navigator.mediaDevices.enumerateDevices();ins=d.filter(x=>x.kind==='audioinput').length;outs=d.filter(x=>x.kind==='audiooutput').length}catch{}
  calCol=[];await sleep(800);const nz=new Float64Array(NT),c0=calCol.slice();calCol=null;c0.forEach(p=>p.forEach((v,k)=>nz[k]+=v/c0.length));
- info.textContent='Kalibrierung: teste 16 Töne…';loop=true;calCol=[];await play(synth([...Array(NT).keys()],()=>10));await sleep(400);const col=calCol;calCol=null;loop=false;
+ info.textContent='Kalibrierung: teste 16 Töne…';loop=true;calCol=[];await play(synth([...Array(NT).keys()],()=>Math.round(.1/M.hs)));await sleep(400);const col=calCol;calCol=null;loop=false;
  const snr=[...Array(NT).keys()].map(k=>10*Math.log10(Math.max(...col.map(p=>p[k]))/(nz[k]+1e-14)+1e-9));
  const good=snr.filter(x=>x>8).length,med=[...snr].sort((a,b)=>a-b)[8],rate=med>=45?0:med>=35?1:med>=25?2:3;
- cal={sr,ins,outs,snr:snr.map(x=>Math.round(x)),good,rate,suit:sr>=44100&&good>=14?'geeignet':good>=8?'eingeschränkt':'ungeeignet'};
- try{localStorage.setItem('sl',JSON.stringify(cal))}catch{}autoRate=rate;info.textContent='Gerät: '+cal.suit+' ('+good+'/16 Töne)';calUI()}
-function calUI(){if(!cal)return;const bad=cal.snr.map((x,k)=>x<=8?(F0+DF*k)/1000:null).filter(Boolean);
- $('cr').innerHTML=`<div>Eignung<b>${cal.suit}</b></div><div>Abtastrate<b>${cal.sr} Hz</b></div><div>Ein-/Ausgänge<b>${cal.ins} / ${cal.outs||'?'}</b></div><div>Start-Symbolzeit<b>${SYMH[cal.rate]*10} ms</b></div><div>Ausgefallene Töne<b>${bad.length?bad.join(', ')+' kHz':'keine'}</b></div>`}
+ cal={sr,ins,outs,snr:snr.map(x=>Math.round(x)),good,rate,suit:(M.id==='a'||sr>=44100)&&good>=14?'geeignet':good>=8?'eingeschränkt':'ungeeignet'};
+ try{localStorage.setItem('sl_'+M.id,JSON.stringify(cal))}catch{}autoRate=rate;info.textContent='Gerät: '+cal.suit+' ('+good+'/16 Töne)';calUI()}
+function calUI(){if(!cal)return;const bad=cal.snr.map((x,k)=>x<=8?F0+DF*k:null).filter(Boolean);
+ $('cr').innerHTML=`<div>Eignung<b>${cal.suit}</b></div><div>Abtastrate<b>${cal.sr} Hz</b></div><div>Ein-/Ausgänge<b>${cal.ins} / ${cal.outs||'?'}</b></div><div>Start-Symbolzeit<b>${Math.round(SYMH[cal.rate]*M.hs*1000)} ms</b></div><div>Ausgefallene Töne<b>${bad.length?bad.join(', ')+' Hz':'keine'}</b></div>`}
 async function loopTest(){if(!ctx)return;loop=true;$('lt').disabled=true;const r=manual>=0?manual:autoRate,al='abcdefghjkmnpqrstuvwxyz23456789';
  for(let i=0;i<3;i++){const t=Array.from({length:8},()=>al[Math.random()*al.length|0]).join(''),t0=performance.now();
   const w=new Promise(res=>{testW={t,res};setTimeout(()=>res(false),frameDur(1,r)*1000+4000)});await tx(pack(3,myId,myId,0,0,1,enc.encode(t)),r,1);const ok=await w;testW=null;
   if(ok){const s=(performance.now()-t0)/1e3,b=64/s;ST.ok++;ST.lat.push(s);ST.rate.push(b);ST.max=Math.max(ST.max,b)}else ST.fail++}
  loop=false;$('lt').disabled=false}
 // ===== UI =====
-function addMsg(o){o.t=new Date();msgs.push(o);render();return o}
+function addMsg(o){o.t=new Date();o.md=M.id;msgs.push(o);render();return o}
 function render(){const c=$('chat'),end=c.scrollTop+c.clientHeight>c.scrollHeight-60;c.innerHTML='';
  for(const m of msgs){const d=document.createElement('div');d.className='m'+(m.me?' me':'');const t=document.createElement('div');t.textContent=m.text;const s=document.createElement('small');
-  s.textContent=(m.me?(m.dst===BC?'An alle':'An '+hex(m.dst)):'Von '+hex(m.src)+(m.dst===BC?' (Broadcast)':''))+' · '+m.t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+(m.st?' · '+m.st:'');d.append(t,s);c.append(d)}
+  s.textContent=(m.me?(m.dst===BC?'An alle':'An '+hex(m.dst)):'Von '+hex(m.src)+(m.dst===BC?' (Broadcast)':''))+' · '+m.t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+(m.md==='a'?' · 🔊':'')+(m.st?' · '+m.st:'');d.append(t,s);c.append(d)}
  if(end)c.scrollTop=c.scrollHeight}
 let sig={pk:-200,pf:0},raf=0;
 function draw(){const tech=$('tech');if(!tech.open||!anal){raf=0;return}const bins=new Float32Array(anal.frequencyBinCount);anal.getFloatFrequencyData(bins);
- const cv=$('cv'),W=cv.width,H=cv.height,g=cv.getContext('2d'),bw=sr/anal.fftSize,lo=17500,hi=22000;g.clearRect(0,0,W,H);let pk=-200,pf=0;
- g.fillStyle='#6EA8FE';for(let x=0;x<W;x++){const f=lo+(hi-lo)*x/W,d=bins[Math.round(f/bw)],h=Math.max(0,(d+120)/90)*H;g.globalAlpha=.8;g.fillRect(x,H-h,1,h);if(f>=18000&&d>pk){pk=d;pf=f}}
+ const cv=$('cv'),W=cv.width,H=cv.height,g=cv.getContext('2d'),bw=sr/anal.fftSize,lo=M.lo,hi=M.hi;g.clearRect(0,0,W,H);let pk=-200,pf=0;
+ g.fillStyle='#6EA8FE';for(let x=0;x<W;x++){const f=lo+(hi-lo)*x/W,d=bins[Math.round(f/bw)],h=Math.max(0,(d+120)/90)*H;g.globalAlpha=.8;g.fillRect(x,H-h,1,h);if(f>=F0-100&&d>pk){pk=d;pf=f}}
  g.globalAlpha=.5;g.fillStyle='#8a93a0';for(let k=0;k<NT;k++)g.fillRect((F0+DF*k-lo)/(hi-lo)*W,0,1,8);sig={pk,pf};raf=requestAnimationFrame(draw)}
-function curFreq(){if(!txPlan)return'–';const e=(performance.now()-txPlan.t0)/10-hn/ (hn/10)*0;let h=e-10;if(h<0)return'–';const S=SYMH[txPlan.rate];const i=h<56?Math.floor(h/4):56/4+Math.floor((h-56)/S);const s=txPlan.syms[i];return s==null?'–':(F0+DF*s)+' Hz'}
+function curFreq(){if(!txPlan)return'–';const h=((performance.now()-txPlan.t0)/1000-.1)/M.hs;if(h<0)return'–';const S=SYMH[txPlan.rate],i=h<PH*14?Math.floor(h/PH):14+Math.floor((h-PH*14)/S),q=txPlan.syms[i];return q==null?'–':(F0+DF*q)+' Hz'}
 function upd(){const s=$('st');s.className='pill '+(!ctx?'':txBusy?'tx':rxst?'rx':'on');s.innerHTML='<i class="dot"></i>'+(!ctx?'Mikro aus':txBusy?'Sendet':rxst?'Empfängt':'Hört zu');
  for(const[k,a]of asm)if(Date.now()-a.t>60000){asm.delete(k);ST.inc++}
  if(!$('tech').open){if(!raf&&anal)raf=requestAnimationFrame(draw);return}if(!raf)raf=requestAnimationFrame(draw);
  const r=manual>=0?manual:autoRate,db=x=>x>0?(10*Math.log10(x)).toFixed(0)+' dB':'–',tot=ST.fOk+ST.fBad,avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
  const now=Date.now(),dl=[...devs].map(([id,d])=>`${hex(id)}: ${d.snr.toFixed(0)} dB, vor ${Math.round((now-d.last)/1e3)} s`).join('<br>')||'keine';
  $('gr').innerHTML=`<div>Erkannte Frequenz<b>${sig.pk>-100?Math.round(sig.pf)+' Hz ('+sig.pk.toFixed(0)+' dBFS)':'–'}</b></div><div>Dominantes Symbol<b>${cur.act?cur.k+' ('+(F0+DF*cur.k)+' Hz)':'–'}</b></div><div>Signal / Rauschen<b>${db(cur.pk)} / ${db(noise)}</b></div><div>SNR letzter Rahmen<b>${lastSnr==null?'–':lastSnr.toFixed(0)+' dB'}</b></div>`+
- `<div>Paketstatus<b>${['Leerlauf','Kopf…','Daten '+(fr&&fr.end?Math.max(0,Math.min(99,Math.round((base+hist.length-fr.ps)/(fr.end-fr.ps)*100))):0)+'%'][rxst]} · ${lastPkt}</b></div><div>Rate (brutto)<b>${(4/(SYMH[r]*.01)).toFixed(0)} bit/s (${SYMH[r]*10} ms)</b></div><div>Sendefrequenz<b>${curFreq()}</b></div><div>Fehlerquote (Rahmen)<b>${tot?(ST.fBad/tot*100).toFixed(0)+' % ('+ST.fBad+'/'+tot+')':'–'}</b></div><div>Geräte<b style="font-size:12px">${dl}</b></div>`;
+ `<div>Paketstatus<b>${['Leerlauf','Kopf…','Daten '+(fr&&fr.end?Math.max(0,Math.min(99,Math.round((base+hist.length-fr.ps)/(fr.end-fr.ps)*100))):0)+'%'][rxst]} · ${lastPkt}</b></div><div>Rate (brutto)<b>${(4/(SYMH[r]*M.hs)).toFixed(0)} bit/s (${Math.round(SYMH[r]*M.hs*1000)} ms)</b></div><div>Sendefrequenz<b>${curFreq()}</b></div><div>Fehlerquote (Rahmen)<b>${tot?(ST.fBad/tot*100).toFixed(0)+' % ('+ST.fBad+'/'+tot+')':'–'}</b></div><div>Geräte<b style="font-size:12px">${dl}</b></div>`;
  $('ts').innerHTML=`<div>Erfolgreich / fehlgeschl.<b>${ST.ok} / ${ST.fail}</b></div><div>Fehlerquote<b>${ST.ok+ST.fail?(ST.fail/(ST.ok+ST.fail)*100).toFixed(0)+' %':'–'}</b></div><div>Ø / max. Rate<b>${avg(ST.rate).toFixed(0)} / ${ST.max.toFixed(0)} bit/s</b></div><div>Ø Verzögerung<b>${avg(ST.lat).toFixed(1)} s</b></div><div>Erkennungsgenauigkeit<b>${ST.bytes?((1-ST.corr/ST.bytes)*100).toFixed(1)+' %':'–'}</b></div><div>Unvollständig<b>${ST.inc}</b></div>`}
 async function init(){$('go').disabled=true;$('err').textContent='';
  try{if(!navigator.mediaDevices?.getUserMedia)throw Error('Kein Mikrofonzugriff – bitte über HTTPS oder localhost öffnen.');
   const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
   try{ctx=new AudioContext({sampleRate:48000,latencyHint:'interactive'})}catch{ctx=new AudioContext()}
-  await ctx.resume();sr=ctx.sampleRate;hn=Math.round(sr*.01);if(!ctx.audioWorklet)throw Error('AudioWorklet wird nicht unterstützt.');
+  await ctx.resume();sr=ctx.sampleRate;hn=Math.round(sr*M.hs);if(!ctx.audioWorklet)throw Error('AudioWorklet wird nicht unterstützt.');
   await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([WK],{type:'application/javascript'})));
-  const src=ctx.createMediaStreamSource(stream),node=new AudioWorkletNode(ctx,'p',{processorOptions:{n:hn}}),z=ctx.createGain();z.gain.value=0;
-  node.port.onmessage=e=>onHop(e.data);anal=ctx.createAnalyser();anal.fftSize=4096;anal.smoothingTimeConstant=.5;
-  src.connect(anal);src.connect(node);node.connect(z);z.connect(ctx.destination);outGain=ctx.createGain();outGain.gain.value=+$('vol').value;outGain.connect(ctx.destination);
-  $('ov').hidden=true;if(cal&&cal.sr===sr){autoRate=cal.rate;calUI()}else await calibrate();
+  src=ctx.createMediaStreamSource(stream);zg=ctx.createGain();zg.gain.value=0;zg.connect(ctx.destination);
+  anal=ctx.createAnalyser();anal.fftSize=8192;anal.smoothingTimeConstant=.5;
+  src.connect(anal);mkNode();outGain=ctx.createGain();outGain.gain.value=+$('vol').value;outGain.connect(ctx.destination);
+  $('ov').hidden=true;applyMode();if(cal&&cal.sr===sr){autoRate=cal.rate;calUI()}else await calibrate();
   setInterval(upd,250);(async()=>{await sleep(3000);for(;;){if(beacons&&!txBusy)tx(pack(2,myId,BC,0,0,1,new Uint8Array(0)),rateFor(BC),2);await sleep(rnd(20000,35000))}})()
  }catch(e){$('err').textContent=e.message;$('go').disabled=false;if(ctx){ctx.close();ctx=null}}}
+function applyMode(){F0=M.F0;DF=M.DF;SYMH=M.S;PH=M.PH;WN=M.WN;OFF=Math.floor((PH-WN)/2);if(sr)hn=Math.round(sr*M.hs);
+ ring=[];hist=[];base=0;rxst=0;best=null;fr=null;noise=null;lastSnr=null;lastPkt='–';devs.clear();$('to').length=1;
+ try{cal=JSON.parse(localStorage.getItem('sl_'+M.id))}catch{cal=null}
+ manual=-1;autoRate=cal?cal.rate:1;$('spd').innerHTML='<option value="-1">Auto (adaptiv)</option>'+SYMH.map((h,i)=>`<option value="${i}">${Math.round(h*M.hs*1000)} ms/Symbol</option>`).join('');$('spd').value=-1;
+ document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.m===M.id));if(cal)calUI();else $('cr').innerHTML=''}
+function mkNode(){if(node){src.disconnect(node);node.disconnect();node.port.onmessage=null}node=new AudioWorkletNode(ctx,'p',{processorOptions:{n:hn}});node.port.onmessage=e=>onHop(e.data);src.connect(node);node.connect(zg)}
+async function setMode(id){if(txBusy||M.id===id)return;cancelled=true;M=MODES[id];applyMode();if(!ctx)return;mkNode();
+ if(!cal||cal.sr!==sr){$('info').textContent='Kalibrierung für neuen Modus…';await calibrate()}}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));applyMode();
 $('me').textContent='ID '+hex(myId);$('go').onclick=init;$('gear').onclick=()=>{calUI();$('set').showModal()};
 $('send').onclick=()=>{const t=$('txt').value.trim();if(t){$('txt').value='';sendText(t,+$('to').value)}};$('txt').onkeydown=e=>{if(e.key==='Enter')$('send').click()};
 $('cancel').onclick=()=>{cancelled=true;curSrc?.stop()};$('vol').oninput=e=>{if(outGain)outGain.gain.value=+e.target.value};
