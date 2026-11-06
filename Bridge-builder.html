@@ -55646,5 +55646,24 @@ export {
 };
 
 </script>
+<script>
+/* Tastatur-Kurzwege: 1-4 wählen Hotbar-Items, Leertaste/Enter startet die Simulation */
+(function(){
+  function isTyping(){ var a=document.activeElement; return !!a && (a.tagName==='INPUT' || a.tagName==='TEXTAREA' || a.isContentEditable); }
+  document.addEventListener('keydown', function(e){
+    if (isTyping()) return;
+    var key = e.key;
+    if (key==='1' || key==='2' || key==='3' || key==='4') {
+      var idx = parseInt(key,10)-1;
+      var btns = document.querySelectorAll('.tool-btn');
+      var b = btns[idx];
+      if (b) { b.click(); e.preventDefault(); e.stopPropagation(); }
+    } else if (key===' ' || key==='Enter') {
+      var play = document.getElementById('hud-btn-play');
+      if (play) { play.click(); e.preventDefault(); e.stopPropagation(); }
+    }
+  }, true);
+})();
+</script>
 </body>
 </html>
