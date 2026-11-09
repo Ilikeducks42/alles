@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lernzettel Physik: Mechanik</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--ink:#14213d;--mut:#5b6b85;--line:#d5dcea;--acc:#e8590c;--blu:#1c6ed5;--grn:#2b9348;--hl:#fff3e0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1624;--card:#17213a;--ink:#e8edf7;--mut:#9aa9c4;--line:#2b3957;--acc:#ff922b;--blu:#5aa2ff;--grn:#51cf66;--hl:#2a2540}}
+:root[data-theme="dark"]{--bg:#0f1624;--card:#17213a;--ink:#e8edf7;--mut:#9aa9c4;--line:#2b3957;--acc:#ff922b;--blu:#5aa2ff;--grn:#51cf66;--hl:#2a2540}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:28px 28px;background-attachment:fixed}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+h1{font:700 clamp(1.7rem,5vw,2.6rem)/1.15 Georgia,"Times New Roman",serif;margin:8px 0 4px}
+h2{font:700 1.35rem/1.25 Georgia,serif;margin:0 0 10px}
+h3{font-size:1rem;margin:16px 0 6px;color:var(--blu)}
+.sub{color:var(--mut);margin:0 0 14px}
+.panel{background:var(--card);border:2px solid var(--ink);border-radius:6px;padding:14px;margin:14px 0}
+.panel summary{cursor:pointer;font-weight:700}
+.bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:var(--grn);transition:width .3s}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-top:10px}
+.chips label{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border:1px solid var(--line);border-radius:6px;cursor:pointer;font-size:.92rem;background:var(--bg);line-height:1.35}
+.chips label:has(input:checked){border-color:var(--grn);background:color-mix(in srgb,var(--grn) 15%,var(--card))}
+.chips input{width:18px;height:18px;margin-top:1px;accent-color:var(--grn);flex:none}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+button{font:inherit;padding:7px 12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:6px;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+section.topic{background:var(--card);border:2px solid var(--ink);border-left:10px solid var(--blu);border-radius:6px;padding:16px;margin:18px 0}
+section.topic.hide{display:none}
+.f{background:var(--hl);border-left:5px solid var(--acc);padding:8px 12px;margin:10px 0;border-radius:4px;font-size:1.05rem}
+.f b{font-family:Georgia,serif}
+.ex{border:1px dashed var(--mut);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:.95rem}
+.ex::before{content:"Beispiel";display:block;font-weight:700;color:var(--grn);margin-bottom:2px}
+.warn{border-left:5px solid #d6336c;padding:6px 12px;margin:10px 0;background:color-mix(in srgb,#d6336c 10%,var(--card))}
+.warn::before{content:"Typischer Fehler: ";font-weight:700;color:#d6336c}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+th{background:var(--bg)}
+.sc{overflow-x:auto}
+.plots{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.plots svg{flex:1 1 150px;max-width:230px;background:var(--bg);border:1px solid var(--line);border-radius:6px}
+svg text{fill:var(--ink);font:11px sans-serif}
+svg .ax{stroke:var(--ink);stroke-width:1.5;fill:none}
+svg .ln{stroke:var(--acc);stroke-width:2.5;fill:none}
+svg .ar{fill:color-mix(in srgb,var(--blu) 25%,transparent);stroke:none}
+svg .b{stroke:var(--blu);stroke-width:2.5;fill:none}
+svg .g{stroke:var(--grn);stroke-width:2.5;fill:none}
+svg .d{stroke:var(--mut);stroke-dasharray:4 3;fill:none}
+.fig{display:block;width:100%;max-width:520px;margin:10px auto;background:var(--bg);border:1px solid var(--line);border-radius:6px}
+.empty{text-align:center;padding:30px;font-size:1.2rem;display:none}
+code{font-family:Georgia,serif;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Physik-Klassenarbeit: Mechanik</h1>
+<p class="sub">Hake oben an, was du schon kannst. Fertige Themen verschwinden.</p>
+
+<div class="panel top">
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
+<b id="cnt">0 von 15 gekonnt</b>
+<span><button id="all">Alle anzeigen</button> <button id="th">Hell/Dunkel</button></span>
+</div>
+<div class="bar"><i id="pb"></i></div>
+<details><summary>Ich kann ... (Themen auswählen)</summary><div class="chips" id="chips"></div></details>
+</div>
+
+<div class="panel"><b>Immer in der Arbeit:</b> erst die <b>Formel</b> hinschreiben, dann <b>Werte mit Einheiten</b> einsetzen, dann Ergebnis mit Einheit. Gegeben / Gesucht / Formel / Rechnung / Antwortsatz.</div>
+
+<div class="empty" id="empty">Alles gekonnt. Viel Erfolg bei der Arbeit!</div>
+
+<section class="topic" data-id="1" data-t="Formelzeichen und Einheiten angeben">
+<h2>1. Formelzeichen und Einheiten</h2>
+<div class="sc"><table><tr><th>Größe</th><th>Zeichen</th><th>Einheit</th></tr>
+<tr><td>Strecke / Weg</td><td><code>s</code></td><td>Meter (m)</td></tr>
+<tr><td>Zeit</td><td><code>t</code></td><td>Sekunde (s)</td></tr>
+<tr><td>Geschwindigkeit</td><td><code>v</code></td><td>m/s (oder km/h)</td></tr>
+<tr><td>Beschleunigung</td><td><code>a</code></td><td>m/s²</td></tr>
+<tr><td>Kraft</td><td><code>F</code></td><td>Newton (N)</td></tr>
+<tr><td>Masse</td><td><code>m</code></td><td>Kilogramm (kg)</td></tr>
+<tr><td>Energie</td><td><code>E</code> (oder W)</td><td>Joule (J)</td></tr>
+<tr><td>Ortsfaktor / Fallbeschleunigung</td><td><code>g</code></td><td>9,81 N/kg = 9,81 m/s²</td></tr></table></div>
+<div class="f">1 N = 1 kg·m/s² &nbsp;|&nbsp; 1 J = 1 N·m &nbsp;|&nbsp; <b>E<sub>kin</sub> = ½·m·v²</b> &nbsp;|&nbsp; <b>E<sub>pot</sub> = m·g·h</b></div>
+<p>Merksatz: Die Masse (kg) ist überall gleich, die Gewichtskraft (N) hängt vom Ort ab.</p>
+</section>
+
+<section class="topic" data-id="2" data-t="km/h in m/s umrechnen">
+<h2>2. km/h ↔ m/s umrechnen</h2>
+<p>1 km/h = 1000 m / 3600 s = 1/3,6 m/s</p>
+<svg class="fig" viewBox="0 0 520 110"><rect x="20" y="15" width="170" height="40" rx="6" class="ax"/><text x="105" y="40" text-anchor="middle" font-size="16">km/h</text><rect x="330" y="15" width="170" height="40" rx="6" class="ax"/><text x="415" y="40" text-anchor="middle" font-size="16">m/s</text><path class="ln" d="M195 28H325M318 22l8 6-8 6"/><path class="b" d="M325 44H195M202 38l-8 6 8 6"/><text x="260" y="20" text-anchor="middle" fill="var(--acc)">÷ 3,6</text><text x="260" y="66" text-anchor="middle">× 3,6</text><text x="260" y="98" text-anchor="middle">Ich will <tspan fill="var(--acc)">kleiner</tspan> werden: teilen, größer: malnehmen</text></svg>
+<div class="f"><b>v[m/s] = v[km/h] : 3,6</b> &nbsp;|&nbsp; <b>v[km/h] = v[m/s] · 3,6</b></div>
+<div class="ex">72 km/h : 3,6 = <b>20 m/s</b>. &nbsp; 5 m/s · 3,6 = <b>18 km/h</b>. &nbsp; 100 km/h ≈ 27,8 m/s.</div>
+<div class="warn">Nicht durch 60 teilen. Immer erst auf m und s umrechnen, bevor du mit s=v·t oder a rechnest.</div>
+<p>Auch wichtig: 1 min = 60 s, 1 h = 3600 s, 1 km = 1000 m.</p>
+</section>
+
+<section class="topic" data-id="3" data-t="Bewegungsvorgänge analysieren">
+<h2>3. Bewegungen analysieren: gleichförmig oder gleichmäßig beschleunigt?</h2>
+<div class="sc"><table><tr><th></th><th>Gleichförmig</th><th>Gleichmäßig beschleunigt</th></tr>
+<tr><td>Geschwindigkeit</td><td>konstant</td><td>ändert sich gleichmäßig (jede Sekunde gleich viel)</td></tr>
+<tr><td>Beschleunigung</td><td>a = 0</td><td>a = konstant ≠ 0</td></tr>
+<tr><td>Kraft (Summe)</td><td>ΣF = 0</td><td>ΣF = konstant ≠ 0</td></tr>
+<tr><td>s-t-Diagramm</td><td>Gerade</td><td>Parabel</td></tr>
+<tr><td>v-t-Diagramm</td><td>waagerechte Gerade</td><td>ansteigende (oder fallende) Gerade</td></tr>
+<tr><td>Beispiele</td><td>Rolltreppe, Fahrt mit Tempomat</td><td>Anfahren, Bremsen, freier Fall</td></tr></table></div>
+<div class="plots" data-p="gf,va"></div>
+<p>Erkennungstrick mit Messwerten: Wächst <code>s</code> pro Sekunde um gleich viel, ist es gleichförmig. Wächst <code>v</code> pro Sekunde um gleich viel, ist es gleichmäßig beschleunigt. Bremsen ist eine negative Beschleunigung (Verzögerung).</p>
+</section>
+
+<section class="topic" data-id="4" data-t="gleichförmige Bewegungen berechnen">
+<h2>4. Gleichförmige Bewegung: s = v·t</h2>
+<div class="f"><b>s = v · t</b> &nbsp;|&nbsp; <b>v = s / t</b> &nbsp;|&nbsp; <b>t = s / v</b></div>
+<svg class="fig" viewBox="0 0 520 90"><path class="ax" d="M20 55H500"/><circle cx="70" cy="40" r="10" class="ln"/><path class="b" d="M90 40H180M172 34l8 6-8 6"/><circle cx="300" cy="40" r="10" class="ln"/><path class="b" d="M320 40H410M402 34l8 6-8 6"/><circle cx="440" cy="40" r="10" class="ln"/><text x="130" y="28" text-anchor="middle">v = 20 m/s</text><text x="370" y="28" text-anchor="middle">v = 20 m/s</text><text x="260" y="80" text-anchor="middle">pro Sekunde immer 20 m weiter</text></svg>
+<div class="ex">Ein Auto fährt 90 km/h = 25 m/s, 12 s lang.<br>Gegeben: v = 25 m/s, t = 12 s. Formel: s = v·t<br>Rechnung: s = 25 m/s · 12 s = <b>300 m</b>.<br>Wie lange für 1,5 km? t = s/v = 1500 m / 25 m/s = <b>60 s</b>.</div>
+<p>Begegnung / Überholen: gleiche Zeit <code>t</code> nutzen und Strecken addieren (Gegenverkehr: s₁+s₂ = Abstand) oder gleichsetzen (Überholen).</p>
+</section>
+
+<section class="topic" data-id="5" data-t="beschleunigte Bewegungen berechnen">
+<h2>5. Gleichmäßig beschleunigte Bewegung (aus der Ruhe)</h2>
+<div class="f"><b>v = a · t</b> &nbsp;|&nbsp; <b>s = ½ · a · t²</b> &nbsp;|&nbsp; <b>v = √(2·a·s)</b> &nbsp;|&nbsp; a = v/t</div>
+<div class="plots" data-p="va"></div>
+<p>Merke: Verdoppelt sich <code>t</code>, vervierfacht sich <code>s</code> (wegen t²). Beim freien Fall ist a = g = 9,81 m/s².</p>
+<div class="ex">a = 2 m/s², t = 5 s.<br>v = a·t = 2 m/s² · 5 s = <b>10 m/s</b><br>s = ½·a·t² = ½ · 2 m/s² · (5 s)² = <b>25 m</b><br>Kontrolle: v = √(2·2·25) = √100 = 10 m/s ✓</div>
+<div class="ex">Stein fällt 3 s. s = ½ · 9,81 m/s² · 9 s² = <b>44,1 m</b>, v = 9,81 · 3 = <b>29,4 m/s</b>.</div>
+<div class="warn">Die Formeln gelten nur, wenn die Bewegung bei v = 0 startet. Beim Bremsen auf 0 rückwärts denken: s = v²/(2a).</div>
+</section>
+
+<section class="topic" data-id="6" data-t="Komplexe Bewegungen analysieren">
+<h2>6. Komplexe Bewegungen: in Phasen zerlegen</h2>
+<p>Vorgehen: (1) Phasen erkennen, (2) für jede Phase die passende Formel, (3) Teilstrecken und Teilzeiten addieren. Die Endgeschwindigkeit einer Phase ist die Startgeschwindigkeit der nächsten.</p>
+<svg class="fig" viewBox="0 0 520 220"><path class="ax" d="M50 20V180H500"/><text x="10" y="18">v</text><text x="494" y="198">t</text>
+<path class="ar" d="M50 180L150 60H390L440 180Z"/><path class="ln" d="M50 180L150 60H390L440 180"/>
+<path class="d" d="M150 60V180M390 60V180"/><text x="50" y="205">0</text><text x="150" y="198" text-anchor="middle">10 s</text><text x="390" y="198" text-anchor="middle">40 s</text><text x="440" y="198" text-anchor="middle">45 s</text><text x="22" y="64">20</text>
+<text x="100" y="140" text-anchor="middle">Phase 1</text><text x="100" y="155" text-anchor="middle">beschleunigen</text><text x="270" y="110" text-anchor="middle">Phase 2: konstant</text><text x="415" y="140" text-anchor="middle">Phase 3</text><text x="415" y="155" text-anchor="middle">bremsen</text></svg>
+<div class="ex">Phase 1: 0→20 m/s in 10 s: a = 2 m/s², s₁ = ½·2·10² = 100 m.<br>Phase 2: 20 m/s für 30 s: s₂ = 20·30 = 600 m.<br>Phase 3: Bremsen mit 4 m/s²: t = 20/4 = 5 s, s₃ = 20²/(2·4) = 50 m.<br>Gesamt: s = 750 m, t = 45 s, Durchschnitt v̄ = 750 m/45 s ≈ <b>16,7 m/s</b>.</div>
+<p>Die Fläche unter dem Graphen (Trapez) ergibt ebenfalls 750 m. Mittlere Geschwindigkeit immer <b>Gesamtweg : Gesamtzeit</b>, nicht Mittelwert der Geschwindigkeiten.</p>
+</section>
+
+<section class="topic" data-id="7" data-t="Diagramme darstellen">
+<h2>7. s-t- und v-t-Diagramme zeichnen</h2>
+<ol><li>Wertetabelle anlegen (t = 0, 1, 2, … s).</li><li>Achsen beschriften mit Größe und Einheit: <code>t in s</code>, <code>s in m</code>, <code>v in m/s</code>.</li><li>Gleichmäßige Skala wählen, Punkte eintragen, mit Lineal (Gerade) oder Freihand (Parabel) verbinden.</li></ol>
+<div class="plots" data-p="gf,va,st,br"></div>
+<div class="sc"><table><tr><th>Bewegung</th><th>s-t</th><th>v-t</th></tr>
+<tr><td>Stillstand</td><td>waagerecht</td><td>auf der t-Achse (v=0)</td></tr>
+<tr><td>gleichförmig</td><td>steigende Gerade</td><td>waagerecht</td></tr>
+<tr><td>beschleunigt</td><td>Parabel nach oben</td><td>steigende Gerade</td></tr>
+<tr><td>Bremsen</td><td>Parabel flacht ab</td><td>fallende Gerade</td></tr>
+<tr><td>Rückwärts</td><td>fallende Gerade</td><td>unter der t-Achse</td></tr></table></div>
+</section>
+
+<section class="topic" data-id="8" data-t="Diagramme interpretieren">
+<h2>8. Diagramme interpretieren</h2>
+<svg class="fig" viewBox="0 0 520 190"><path class="ax" d="M40 15V160H250M290 15V160H500"/><text x="20" y="14">s</text><text x="274" y="14">v</text>
+<path class="ln" d="M40 160L150 60"/><text x="145" y="52">Steigung = v</text>
+<path class="b" d="M290 160L430 40V160Z" fill="color-mix(in srgb,var(--blu) 25%,transparent)"/><text x="365" y="130" text-anchor="middle">Fläche = s</text><text x="445" y="80">Steigung = a</text><text x="40" y="182">s-t: Steigung ablesen</text><text x="290" y="182">v-t: Steigung und Fläche</text></svg>
+<div class="f">Steigung im s-t-Diagramm = <b>v</b> &nbsp;|&nbsp; Steigung im v-t-Diagramm = <b>a</b> &nbsp;|&nbsp; Fläche unter v-t = <b>s</b></div>
+<div class="ex">Steigungsdreieck: von (2 s | 10 m) bis (6 s | 50 m): v = Δs/Δt = 40 m / 4 s = <b>10 m/s</b>.<br>v-t: Gerade von 0 auf 8 m/s in 4 s: a = 8/4 = 2 m/s²; Fläche ½·4·8 = <b>16 m</b>.</div>
+<p>Knicke im Graph = Phasenwechsel. Steilerer s-t-Graph = schneller. Schnittpunkt zweier s-t-Graphen = Treffpunkt (gleiches s zur gleichen Zeit), Schnittpunkt zweier v-t-Graphen = gleiche Geschwindigkeit, nicht Treffpunkt.</p>
+</section>
+
+<section class="topic" data-id="9" data-t="waagerechter Wurf">
+<h2>9. Waagerechter Wurf</h2>
+<p><b>Superpositionsprinzip:</b> Zwei Bewegungen laufen unabhängig. Waagerecht gleichförmig mit v₀, senkrecht freier Fall.</p>
+<svg class="fig" viewBox="0 0 520 260"><path class="ax" d="M30 30V230H500"/><text x="36" y="26">y (nach unten)</text><text x="470" y="250">x</text>
+<path class="ln" d="M30 30Q250 30 450 230"/><circle cx="30" cy="30" r="5" fill="var(--acc)"/>
+<path class="b" d="M30 30H120M112 25l8 5-8 5"/><text x="60" y="22" fill="var(--blu)">v₀</text>
+<path class="d" d="M250 30V230M450 30V230"/><path class="g" d="M450 230V160M445 168l5-8 5 8"/><path class="g" d="M430 190L450 230"/>
+<text x="150" y="190">x = v₀·t</text><text x="262" y="140">y = ½·g·t²</text><text x="430" y="252">Wurfweite</text><text x="40" y="130">Höhe h</text><path class="d" d="M20 30V230"/></svg>
+<div class="f"><b>x = v₀·t</b> &nbsp;|&nbsp; <b>y = ½·g·t²</b> &nbsp;|&nbsp; <b>v<sub>y</sub> = g·t</b><br><b>Fallzeit t = √(2h/g)</b> &nbsp;|&nbsp; <b>Wurfweite x = v₀·t</b> &nbsp;|&nbsp; <b>v = √(v₀² + v<sub>y</sub>²)</b></div>
+<div class="ex">Ball rollt mit v₀ = 10 m/s von einem 45 m hohen Dach.<br>t = √(2·45 m / 9,81 m/s²) = <b>3,03 s</b><br>x = 10 m/s · 3,03 s = <b>30,3 m</b><br>v<sub>y</sub> = 9,81 · 3,03 = 29,7 m/s; v = √(10² + 29,7²) = <b>31,4 m/s</b></div>
+<div class="warn">Die Fallzeit hängt nicht von v₀ ab. Ein waagerecht geworfener und ein fallen gelassener Ball landen gleichzeitig.</div>
+</section>
+
+<section class="topic" data-id="10" data-t="Gewichtskräfte berechnen">
+<h2>10. Gewichtskraft</h2>
+<div class="f"><b>F<sub>G</sub> = m · g</b> &nbsp;|&nbsp; g = 9,81 N/kg (Erde), ≈ 1,6 N/kg (Mond), ≈ 3,7 N/kg (Mars)</div>
+<svg class="fig" viewBox="0 0 520 150" style="max-width:300px"><path class="ax" d="M40 110H260"/><rect x="110" y="60" width="60" height="50" class="ax"/><text x="140" y="90" text-anchor="middle">5 kg</text><path class="ln" d="M140 110V145M134 137l6 8 6-8"/><text x="152" y="140">F<tspan font-size="9" dy="3">G</tspan> = 49 N</text><path class="b" d="M140 60V20M134 28l6-8 6 8"/><text x="152" y="35" fill="var(--blu)">F<tspan font-size="9" dy="3">N</tspan></text></svg>
+<div class="ex">m = 5 kg: F<sub>G</sub> = 5 kg · 9,81 N/kg = <b>49,05 N</b> (≈ 50 N mit g≈10).<br>Auf dem Mond: 5 · 1,62 = 8,1 N. Die Masse bleibt 5 kg.<br>Umgekehrt: F<sub>G</sub> = 686 N → m = 686/9,81 = 70 kg.</div>
+<p>Die Gewichtskraft greift im Schwerpunkt an und zeigt immer zum Erdmittelpunkt (senkrecht nach unten).</p>
+</section>
+
+<section class="topic" data-id="11" data-t="Kräfte an der geneigten Ebene">
+<h2>11. Geneigte Ebene</h2>
+<p>Die Gewichtskraft wird in zwei Komponenten zerlegt: <b>Hangabtrieb</b> (parallel zur Ebene) und <b>Normalkraft</b> (senkrecht zur Ebene, drückt auf die Unterlage).</p>
+<svg class="fig" viewBox="0 0 520 280"><path d="M30 250H480L30 90Z" fill="color-mix(in srgb,var(--blu) 12%,transparent)" class="ax"/><text x="395" y="243">α</text><path class="ax" d="M420 250A60 60 0 0 0 430 227" />
+<g transform="rotate(-19.6 250 170)"><rect x="220" y="125" width="60" height="45" fill="var(--card)" class="ax"/></g>
+<circle cx="250" cy="148" r="3" fill="var(--ink)"/>
+<path class="ln" d="M250 148V235M244 227l6 8 6-8"/><text x="256" y="232">F<tspan font-size="9" dy="3">G</tspan></text>
+<path class="b" d="M250 148L188 193M194 183l-7 11 13-2"/><text x="120" y="190" fill="var(--blu)">F<tspan font-size="9" dy="3">H</tspan> = F<tspan font-size="9" dy="3">G</tspan>·sin α</text>
+<path class="g" d="M250 148L283 233M274 227l9 6 0-11" /><text x="290" y="205" fill="var(--grn)">F<tspan font-size="9" dy="3">N</tspan> = F<tspan font-size="9" dy="3">G</tspan>·cos α</text>
+<path class="d" d="M188 193L250 235M283 233L250 235"/></svg>
+<div class="f"><b>F<sub>H</sub> = F<sub>G</sub> · sin α</b> &nbsp;|&nbsp; <b>F<sub>N</sub> = F<sub>G</sub> · cos α</b> &nbsp;|&nbsp; F<sub>R</sub> = μ · F<sub>N</sub><br>Ohne Reibung: <b>a = g · sin α</b></div>
+<div class="ex">m = 10 kg, α = 30°: F<sub>G</sub> = 98,1 N<br>F<sub>H</sub> = 98,1 N · sin 30° = <b>49,05 N</b>; F<sub>N</sub> = 98,1 N · cos 30° = <b>84,96 N</b><br>a = 9,81 · 0,5 = 4,9 m/s² (reibungsfrei).<br>Mit Reibung μ = 0,2: F<sub>R</sub> = 17,0 N, ΣF = 32,1 N, a = 3,2 m/s².</div>
+<p>Je steiler der Winkel, desto größer F<sub>H</sub> und desto kleiner F<sub>N</sub>. Bei α = 0° ist F<sub>H</sub> = 0, bei 90° ist F<sub>H</sub> = F<sub>G</sub>. In einer Konstruktion: Parallelogramm mit F<sub>G</sub> als Diagonale zeichnen.</p>
+</section>
+
+<section class="topic" data-id="12" data-t="Kräfte zusammenfassen">
+<h2>12. Kräfte zu einer Gesamtkraft zusammenfassen</h2>
+<div class="sc"><table><tr><th>Fall</th><th>Gesamtkraft</th></tr>
+<tr><td>gleiche Richtung</td><td>F<sub>ges</sub> = F₁ + F₂</td></tr>
+<tr><td>entgegengesetzt</td><td>F<sub>ges</sub> = F₁ − F₂ (Richtung der größeren)</td></tr>
+<tr><td>senkrecht zueinander</td><td>F<sub>ges</sub> = √(F₁² + F₂²) (Pythagoras)</td></tr>
+<tr><td>beliebiger Winkel</td><td>Kräfteparallelogramm zeichnen (Maßstab, z. B. 1 cm = 1 N)</td></tr></table></div>
+<svg class="fig" viewBox="0 0 520 220" style="max-width:420px"><path d="M60 180H280L350 90H130Z" fill="color-mix(in srgb,var(--acc) 10%,transparent)" class="d"/>
+<path class="b" d="M60 180H280M272 175l8 5-8 5"/><path class="g" d="M60 180L130 90M122 98l8-8 -2 11"/><path class="ln" d="M60 180L350 90M340 90l10 0-7 8" /><text x="170" y="198" fill="var(--blu)">F₁ = 4 N</text><text x="62" y="130" fill="var(--grn)">F₂ = 3 N</text><text x="215" y="120" fill="var(--acc)">F<tspan font-size="9" dy="3">ges</tspan></text></svg>
+<div class="ex">F₁ = 4 N nach rechts, F₂ = 3 N nach oben: F<sub>ges</sub> = √(16+9) = √25 = <b>5 N</b>, Winkel tan φ = 3/4 → 36,9° zur F₁-Richtung.<br>Gegenrichtung: 12 N Antrieb, 5 N Reibung → <b>7 N</b> nach vorn.</div>
+<p>Wichtig: Kräfte sind Vektoren, sie haben Betrag <i>und</i> Richtung. Die Gesamtkraft ΣF bestimmt die Beschleunigung.</p>
+</section>
+
+<section class="topic" data-id="13" data-t="Wechselwirkungsgesetz vs. Kräftegleichgewicht">
+<h2>13. Wechselwirkungsgesetz und Kräftegleichgewicht</h2>
+<svg class="fig" viewBox="0 0 520 190"><rect x="10" y="10" width="245" height="170" rx="6" class="ax"/><rect x="265" y="10" width="245" height="170" rx="6" class="ax"/>
+<text x="132" y="30" text-anchor="middle" font-weight="700">Wechselwirkung</text><rect x="35" y="70" width="60" height="50" class="ax"/><rect x="170" y="70" width="60" height="50" class="ax"/><text x="65" y="100" text-anchor="middle">A</text><text x="200" y="100" text-anchor="middle">B</text><path class="ln" d="M95 85H140M132 80l8 5-8 5"/><path class="b" d="M170 105H125M133 100l-8 5 8 5"/><text x="132" y="150" text-anchor="middle">2 Körper, F = −F</text>
+<text x="387" y="30" text-anchor="middle" font-weight="700">Gleichgewicht</text><rect x="357" y="85" width="60" height="50" class="ax"/><path class="ln" d="M387 85V55M381 63l6-8 6 8"/><path class="b" d="M387 135V165M381 157l6 8 6-8"/><text x="387" y="178" text-anchor="middle" font-size="10">1 Körper, ΣF = 0</text></svg>
+<div class="sc"><table><tr><th></th><th>Wechselwirkung (3. newtonsches Gesetz)</th><th>Kräftegleichgewicht</th></tr>
+<tr><td>Angriffspunkt</td><td>an <b>zwei verschiedenen</b> Körpern</td><td>am <b>gleichen</b> Körper</td></tr>
+<tr><td>Betrag / Richtung</td><td>gleich groß, entgegengesetzt</td><td>gleich groß, entgegengesetzt</td></tr>
+<tr><td>Kraftart</td><td>immer gleiche Art</td><td>meist verschiedene Arten</td></tr>
+<tr><td>Wirkung</td><td>heben sich nicht auf</td><td>ΣF = 0, a = 0</td></tr></table></div>
+<div class="f"><b>F<sub>A auf B</sub> = − F<sub>B auf A</sub></b> (actio = reactio)</div>
+<div class="ex">Buch auf Tisch: Gewichtskraft (Erde→Buch) und Tischkraft (Tisch→Buch) = Gleichgewicht (beide am Buch).<br>Wechselwirkungspartner der Gewichtskraft: das Buch zieht die Erde an. Rakete: Gase nach unten, Rakete nach oben.</div>
+<div class="warn">„Actio und Reactio heben sich auf“ ist falsch, sie greifen an verschiedenen Körpern an.</div>
+</section>
+
+<section class="topic" data-id="14" data-t="Grundgesetz der Mechanik">
+<h2>14. Grundgesetz der Mechanik: F = m · a</h2>
+<div class="f"><b>F = m · a</b> &nbsp;|&nbsp; <b>a = F / m</b> &nbsp;|&nbsp; <b>m = F / a</b> &nbsp;|&nbsp; F ist die <b>Summe</b> aller Kräfte (ΣF)</div>
+<p>Je größer die Kraft, desto größer die Beschleunigung (<i>proportional</i>). Je größer die Masse, desto kleiner die Beschleunigung (<i>umgekehrt proportional</i>).</p>
+<svg class="fig" viewBox="0 0 520 160"><path class="ax" d="M40 130H240M40 130V20M290 130H490M290 130V20"/><text x="44" y="16">a</text><text x="228" y="148">F (m fest)</text><path class="ln" d="M40 130L230 30"/><text x="294" y="16">a</text><text x="470" y="148">m (F fest)</text><path class="b" d="M295 30Q310 100 485 125" /></svg>
+<div class="ex">Auto m = 1200 kg, Antrieb 3500 N, Reibung 500 N: ΣF = 3000 N.<br>a = F/m = 3000 N / 1200 kg = <b>2,5 m/s²</b>.<br>Nach 8 s: v = 2,5 · 8 = 20 m/s; s = ½·2,5·64 = 80 m.<br>Bremsen: m = 1000 kg, a = −5 m/s² → F = <b>5000 N</b> Bremskraft.</div>
+<p>Verbindung zu anderen Themen: Freier Fall: F<sub>G</sub> = m·g = m·a ergibt a = g. Geneigte Ebene: a = F<sub>H</sub>/m.</p>
+</section>
+
+<section class="topic" data-id="15" data-t="Trägheitsgesetz anwenden">
+<h2>15. Trägheitsgesetz (1. newtonsches Gesetz)</h2>
+<div class="f">Ein Körper bleibt in <b>Ruhe</b> oder in <b>gleichförmiger, geradliniger Bewegung</b>, solange keine resultierende Kraft auf ihn wirkt (ΣF = 0).</div>
+<p>Trägheit: Körper widerstehen einer Änderung ihres Bewegungszustands. Maß der Trägheit ist die Masse: schwere Körper sind träger.</p>
+<svg class="fig" viewBox="0 0 520 120"><path class="ax" d="M20 95H500"/><rect x="60" y="55" width="70" height="35" rx="4" class="ax"/><circle cx="95" cy="40" r="9" class="ax"/><path class="ln" d="M130 70H190M182 65l8 5-8 5"/><text x="60" y="30" font-size="10">Bremsen:</text><text x="60" y="112" font-size="10">Körper fliegt nach vorn weiter</text><path class="b" d="M115 40H190M182 35l8 5-8 5"/><rect x="330" y="55" width="70" height="35" rx="4" class="ax"/><text x="330" y="112" font-size="10">Anfahren: Körper bleibt zurück</text></svg>
+<div class="ex">Bremsen im Bus: Personen kippen nach vorn (wollen ihre Geschwindigkeit behalten).<br>Tischtuch ruckartig wegziehen: Geschirr bleibt stehen.<br>Hammerstiel auf den Boden schlagen: Hammerkopf rutscht fest.<br>Kugel im Weltall ohne Kraft: fliegt für immer mit konstantem v.</div>
+<div class="warn">Konstante Geschwindigkeit heißt nicht „keine Kraft“, sondern ΣF = 0, z. B. Antrieb = Reibung bei Tempomatfahrt.</div>
+</section>
+
+<p class="sub" style="text-align:center">Formelübersicht: v=s/t &nbsp;|&nbsp; v=a·t &nbsp;|&nbsp; s=½at² &nbsp;|&nbsp; v=√(2as) &nbsp;|&nbsp; F=m·a &nbsp;|&nbsp; F<sub>G</sub>=m·g</p>
+</div>
+
+<script>
+var T=[].slice.call(document.querySelectorAll('section.topic'));
+var KEY='mech-done',done={};
+try{done=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+var chips=document.getElementById('chips');
+T.forEach(function(s){var id=s.dataset.id,l=document.createElement('label');
+l.innerHTML='<input type="checkbox" data-id="'+id+'"><span>'+id+'. '+s.dataset.t+'</span>';chips.appendChild(l)});
+function apply(){var n=0;T.forEach(function(s){var d=!!done[s.dataset.id];s.classList.toggle('hide',d);if(d)n++});
+[].forEach.call(chips.querySelectorAll('input'),function(i){i.checked=!!done[i.dataset.id]});
+document.getElementById('cnt').textContent=n+' von '+T.length+' gekonnt';
+document.getElementById('pb').style.width=(100*n/T.length)+'%';
+document.getElementById('empty').style.display=n===T.length?'block':'none';
+try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+chips.addEventListener('change',function(e){done[e.target.dataset.id]=e.target.checked;apply()});
+document.getElementById('all').onclick=function(){done={};apply()};
+document.getElementById('th').onclick=function(){var r=document.documentElement,d=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0f1624';r.setAttribute('data-theme',d?'light':'dark')};
+/* Diagramme */
+var P={
+gf:[['s-t gleichförmig','s',[[0,0],[1,1]]],['v-t gleichförmig','v',[[0,.5],[1,.5]],1]],
+va:[['s-t beschleunigt','s',f(function(x){return x*x})],['v-t beschleunigt','v',[[0,0],[1,1]],1],['a-t beschleunigt','a',[[0,.5],[1,.5]],1]],
+st:[['Stillstand s-t','s',[[0,.4],[1,.4]]]],
+br:[['s-t Bremsen','s',f(function(x){return 1-(1-x)*(1-x)})],['v-t Bremsen','v',[[0,1],[1,0]],1]]};
+function f(g){var a=[];for(var i=0;i<=20;i++)a.push([i/20,g(i/20)]);return a}
+function plot(p){var W=150,H=120,x0=26,y0=96,w=112,h=76,pts=p[2].map(function(q){return(x0+q[0]*w).toFixed(1)+','+(y0-q[1]*h).toFixed(1)});
+var s='<svg viewBox="0 0 '+W+' '+H+'"><path class="ax" d="M'+x0+' 10V'+y0+'H142"/><text x="4" y="16">'+p[1]+'</text><text x="132" y="110">t</text>';
+if(p[3])s+='<polygon class="ar" points="'+x0+','+y0+' '+pts.join(' ')+' '+(x0+w)+','+y0+'"/>';
+s+='<polyline class="ln" points="'+pts.join(' ')+'"/><text x="'+x0+'" y="118" font-size="9">'+p[0]+'</text></svg>';return s}
+[].forEach.call(document.querySelectorAll('.plots'),function(el){var o='';el.dataset.p.split(',').forEach(function(k){P[k].forEach(function(p){o+=plot(p)})});el.innerHTML=o});
+apply();
+</script>
+</body>
+</html>
