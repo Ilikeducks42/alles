@@ -232,13 +232,8 @@ body[data-input="gamepad"] #lockHint {
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.48);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  animation: panelIn 0.2s ease-out;
 }
 #panel.open { display: flex; }
-@keyframes panelIn {
-  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
 
 .tabs {
   display: flex;
@@ -438,6 +433,13 @@ body[data-input="touch"] #touch { display: block; }
   height: 62px;
   font-size: 24px;
 }
+#th {
+  right: calc(36px + env(safe-area-inset-right, 0px));
+  bottom: calc(122px + env(safe-area-inset-bottom, 0px));
+  width: 62px;
+  height: 62px;
+  font-size: 24px;
+}
 
 #jbase {
   position: fixed;
@@ -466,6 +468,135 @@ body[data-input="touch"] #touch { display: block; }
   background: rgba(255, 255, 255, 0.45);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
+
+/* ==========================================================================
+   MODUS & GAME OVER OVERLAYS
+   ========================================================================== */
+
+#modeBadge {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--ui-line);
+  color: rgba(244, 246, 250, 0.65);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+#modeBadge:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(244, 246, 250, 0.95);
+}
+
+#bestScoreBadge {
+  font-size: 11px;
+  font-weight: 300;
+  color: #9aa0aa;
+  letter-spacing: 0.18em;
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   VOLLFLÄCHIGE OVERLAYS (Hauptmenü & Game Over) – minimal, grau, ohne Animation
+   ========================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 11, 0.82);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Hauptmenü: linke Hälfte Arcade, rechte Hälfte Entspannt */
+.mode-menu {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 11, 0.88);
+  z-index: 100;
+  display: flex;
+}
+.mode-half {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.25s ease;
+}
+.mode-half + .mode-half {
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+}
+.mode-half:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.mode-half-label {
+  font-size: 17px;
+  font-weight: 300;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: #9aa0aa;
+  transition: color 0.25s ease;
+  padding-left: 0.45em; /* optischer Ausgleich zum Letter-Spacing */
+}
+.mode-half:hover .mode-half-label {
+  color: #f4f6fa;
+}
+.mode-half-sub {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  color: #5d636d;
+}
+
+/* Game Over: nur nötiger Text, dünne graue Schrift */
+.over-card {
+  text-align: center;
+  user-select: none;
+  color: var(--ui-fg);
+}
+.over-score {
+  font-size: 56px;
+  font-weight: 200;
+  letter-spacing: 0.08em;
+  color: #f4f6fa;
+  font-variant-numeric: tabular-nums;
+}
+.over-best {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: #6f757f;
+  margin-top: 8px;
+}
+.over-record {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.35em;
+  color: #b8bdc6;
+  margin-top: 22px;
+}
+.over-hint {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  color: #6f757f;
+  margin-top: 30px;
+}
+.over-hint + .over-hint {
+  margin-top: 8px;
+}
+
 </style>
 </head>
 <body data-input="mouse">
@@ -474,6 +605,29 @@ body[data-input="touch"] #touch { display: block; }
 <div id="fade"></div>
 
 <!-- Minimalistisches HUD -->
+
+<!-- HAUPTMENÜ: linke Hälfte Arcade, rechte Hälfte Entspannt -->
+<div id="modeModal" class="mode-menu" style="display:none;">
+  <div class="mode-half" id="btnSelectArcade">
+    <span class="mode-half-label">Arcade</span>
+    <span class="mode-half-sub" id="modalBestArcade"></span>
+  </div>
+  <div class="mode-half" id="btnSelectCasual">
+    <span class="mode-half-label">Entspannt</span>
+  </div>
+</div>
+
+<!-- GAME OVER: verdunkeltes Vollbild, Klick = weiter, Esc = Menü -->
+<div id="gameOverModal" class="modal-overlay" style="display:none;">
+  <div class="over-card">
+    <div class="over-score" id="finalScoreVal">0</div>
+    <div class="over-best" id="finalBestVal">BEST 0</div>
+    <div class="over-record" id="newRecordBanner" style="display:none;">NEUER BESTWERT</div>
+    <div class="over-hint">Klicken — Weiter</div>
+    <div class="over-hint">Esc — Menü</div>
+  </div>
+</div>
+
 <div id="reticle">
   <svg viewBox="0 0 40 40">
     <circle class="ring-bg" cx="20" cy="20" r="14"></circle>
@@ -483,17 +637,22 @@ body[data-input="touch"] #touch { display: block; }
 </div>
 
 <div id="hud">
-  <div id="score">0</div>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <div id="score">0</div>
+    <div id="modeBadge" title="Klicken für Modus-Auswahl">ARCADE</div>
+  </div>
+  <div id="bestScoreBadge" title="Bester Rekord">BEST 0</div>
   <div id="viewBadge">1P</div>
 </div>
 
-<div id="lockHint">Klicken zum Spielen · C: 3rd Person</div>
+<div id="lockHint">Klicken zum Spielen · C: 3P · E / Rechtsklick halten: Hook</div>
 
 <!-- Touch Steuerung -->
 <div id="touch">
   <div id="jbase"><div id="jknob"></div></div>
   <div class="tb" id="tj" data-act="jump" aria-label="Springen">▲</div>
   <div class="tb" id="td" data-act="dash" aria-label="Dash">»</div>
+  <div class="tb" id="th" data-act="hook" aria-label="Grapple Hook">🪝</div>
 </div>
 
 <!-- Schnelltaste Perspektive -->
@@ -528,10 +687,19 @@ body[data-input="touch"] #touch { display: block; }
       <input type="color" id="cPill">
     </div>
 
-    <!-- Säulen-Modus (Unendlich tief) -->
+    <!-- Plattform-Kanten (Toggle + Farbe) -->
     <div class="panel-row">
-      <span class="panel-label">Säulen (endlos tief)</span>
-      <button class="pill-toggle" id="btnPillars">Aus</button>
+      <span class="panel-label">
+        Kanten
+        <button class="pill-toggle" id="btnEdgeToggle">An</button>
+      </span>
+      <input type="color" id="cEdge">
+    </div>
+
+    <!-- Grapple-Seil Farbe -->
+    <div class="panel-row">
+      <span class="panel-label">Seil</span>
+      <input type="color" id="cRope">
     </div>
 
     <!-- Punkt in der Mitte -->
@@ -550,6 +718,12 @@ body[data-input="touch"] #touch { display: block; }
         <button class="pill-toggle" id="btnRingToggle">An</button>
       </span>
       <input type="color" id="cRing">
+    </div>
+
+    <!-- Säulen-Modus (Unendlich tief) -->
+    <div class="panel-row" style="border-top:1px solid var(--ui-line); padding-top:8px;">
+      <span class="panel-label">Säulen (endlos tief)</span>
+      <button class="pill-toggle" id="btnPillars">Aus</button>
     </div>
 
     <!-- Eigener Welthintergrund (Bild/Video) -->
@@ -584,6 +758,28 @@ body[data-input="touch"] #touch { display: block; }
 
   <!-- TAB 2: WELTGENERIERUNG & PHYSIK -->
   <div class="tab-content" id="tabWorld">
+    <div class="panel-row" style="border-bottom:1px solid var(--ui-line); padding-bottom:8px;">
+      <span class="panel-label">Spielmodus</span>
+      <button class="pill-toggle active" id="btnModeToggle">Arcade</button>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label">
+        Grappler (Hook)
+        <button class="pill-toggle active" id="btnGrappleToggle">An</button>
+      </span>
+    </div>
+    <div class="panel-row" id="rowGrappleRange">
+      <span class="panel-label">Hook-Distanz <span class="panel-val" id="valGrappleRange">32m</span></span>
+      <input type="range" id="grappleRangeSlider" min="16" max="48" step="2">
+    </div>
+    <div class="panel-row" id="rowGrappleSpeed">
+      <span class="panel-label">Einhol-Tempo <span class="panel-val" id="valGrappleSpeed">6.5m/s</span></span>
+      <input type="range" id="grappleSpeedSlider" min="3.0" max="14.0" step="0.5">
+    </div>
+    <div class="panel-row" id="rowGrappleCd">
+      <span class="panel-label">Hook-Cooldown <span class="panel-val" id="valGrappleCd">0.5s</span></span>
+      <input type="range" id="grappleCdSlider" min="0" max="2" step="0.1">
+    </div>
     <div class="panel-row">
       <span class="panel-label">Abstand <span class="panel-val" id="valGap">1.0x</span></span>
       <input type="range" id="gapSlider" min="0.4" max="2.4" step="0.1">
@@ -741,7 +937,81 @@ const Sound = (() => {
     } catch (e) {}
   };
 
-  return { ensure, jump, dash, land, respawn };
+  const hookAttach = () => {
+    if (!ctx || !Settings.data.sound) return;
+    try {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, t);
+      osc.frequency.exponentialRampToValueAtTime(1420, t + 0.08);
+      gain.gain.setValueAtTime(0.14, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.1);
+    } catch (e) {}
+  };
+
+  const hookRelease = () => {
+    if (!ctx || !Settings.data.sound) return;
+    try {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(620, t);
+      osc.frequency.exponentialRampToValueAtTime(310, t + 0.12);
+      gain.gain.setValueAtTime(0.1, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    } catch (e) {}
+  };
+
+  const gameOver = () => {
+    if (!ctx || !Settings.data.sound) return;
+    try {
+      const t = ctx.currentTime;
+      [220, 185, 146, 110].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, t + idx * 0.12);
+        gain.gain.setValueAtTime(0.08, t + idx * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.12 + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t + idx * 0.12);
+        osc.stop(t + idx * 0.12 + 0.35);
+      });
+    } catch (e) {}
+  };
+
+  const newRecord = () => {
+    if (!ctx || !Settings.data.sound) return;
+    try {
+      const t = ctx.currentTime;
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + idx * 0.08);
+        gain.gain.setValueAtTime(0.12, t + idx * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.08 + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t + idx * 0.08);
+        osc.stop(t + idx * 0.08 + 0.5);
+      });
+    } catch (e) {}
+  };
+
+  return { ensure, jump, dash, land, respawn, hookAttach, hookRelease, gameOver, newRecord };
 })();
 
 /* ==========================================================================
@@ -760,6 +1030,9 @@ const Settings = {
   defaults: {
     bg: '#0e121a',
     platform: '#7cf0c9',
+    edgeColor: '#7cf0c9',
+    showEdges: true,
+    ropeColor: '#7cf0c9',
     pillColor: '#f5f7fb',
     reticle: true,
     reticleColor: '#ffffff',
@@ -770,6 +1043,11 @@ const Settings = {
     heightVar: 1.0,
     sizeFactor: 1.0,
     infiniteDashes: false,
+    gameMode: 'arcade', // 'arcade' oder 'casual'
+    grappleEnabled: true,
+    grappleRange: 32,
+    grappleReelSpeed: 6.5,
+    hookCd: 0.5,
     bgRotY: 0,
     bgRotX: 0,
     videoAudio: false,
@@ -898,12 +1176,13 @@ const Input = (() => {
   const s = {
     mx: 0, my: 0,
     jumpHeld: false,
+    hookHeld: false,
     jumpEdge: false,
     dashEdge: false,
     lookX: 0, lookY: 0
   };
   const keys = {};
-  let padJumpPrev = false, padDashPrev = false, touchJump = false;
+  let padJumpPrev = false, padDashPrev = false, padHookPrev = false, touchJump = false, touchHook = false, rightBtn = false;
   let mode = ('ontouchstart' in window || navigator.maxTouchPoints > 0) ? 'touch' : 'mouse';
   
   const setMode = m => {
@@ -927,13 +1206,21 @@ const Input = (() => {
       e.preventDefault();
       s.dashEdge = true;
     }
+    if (e.code === 'KeyR' && Game.gameOver) {
+      e.preventDefault();
+      Game.restartRun();
+    }
     if (e.code === 'KeyC') {
       Game.togglePerspective();
     }
     keys[e.code] = true;
   });
   addEventListener('keyup', e => { keys[e.code] = false; });
-  addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+  addEventListener('blur', () => {
+    for (const k in keys) keys[k] = false;
+    rightBtn = false;
+    touchHook = false;
+  });
 
   const canvas = $('c');
   const lockPointer = () => {
@@ -944,6 +1231,20 @@ const Input = (() => {
   canvas.addEventListener('click', () => {
     Sound.ensure();
     lockPointer();
+  });
+  canvas.addEventListener('contextmenu', e => {
+    e.preventDefault();
+  });
+  // Rechte Maustaste: Hook wird GEHALTEN (kein Toggle)
+  canvas.addEventListener('mousedown', e => {
+    Sound.ensure();
+    if (e.button === 2) {
+      e.preventDefault();
+      rightBtn = true;
+    }
+  });
+  addEventListener('mouseup', e => {
+    if (e.button === 2) rightBtn = false;
   });
   document.addEventListener('pointerlockchange', () => {
     const locked = document.pointerLockElement === canvas;
@@ -981,6 +1282,8 @@ const Input = (() => {
           s.jumpEdge = true;
         } else if (actBtn.dataset.act === 'dash') {
           s.dashEdge = true;
+        } else if (actBtn.dataset.act === 'hook') {
+          touchHook = true;
         }
       } else if (t.clientX < window.innerWidth * 0.5 && !joy) {
         joy = { id: t.identifier, x: t.clientX, y: t.clientY };
@@ -1027,6 +1330,8 @@ const Input = (() => {
       if (activeTouchButtons[t.identifier]) {
         if (activeTouchButtons[t.identifier].dataset.act === 'jump') {
           touchJump = false;
+        } else if (activeTouchButtons[t.identifier].dataset.act === 'hook') {
+          touchHook = false;
         }
         activeTouchButtons[t.identifier].classList.remove('on');
         delete activeTouchButtons[t.identifier];
@@ -1066,7 +1371,8 @@ const Input = (() => {
     const btn = idx => !!(gp.buttons[idx] && gp.buttons[idx].pressed);
 
     const padJump = btn(0);
-    const padDash = btn(1) || btn(2) || btn(4) || btn(5) || btn(6) || btn(7);
+    const padDash = btn(1) || btn(5) || btn(7);
+    const padHook = btn(2) || btn(3) || btn(4) || btn(6);
     const padMenu = btn(9);
     const padView = btn(11) || btn(13);
 
@@ -1075,11 +1381,12 @@ const Input = (() => {
     if (padMenu && !padMenuPrev) Game.togglePanel();
     if (padView && !padViewPrev) Game.togglePerspective();
 
-    const active = Math.hypot(lx, ly) > 0.05 || Math.hypot(rx, ry) > 0.05 || padJump || padDash;
+    const active = Math.hypot(lx, ly) > 0.05 || Math.hypot(rx, ry) > 0.05 || padJump || padDash || padHook;
     if (active) setMode('gamepad');
 
     padJumpPrev = padJump;
     padDashPrev = padDash;
+    padHookPrev = padHook;
     padMenuPrev = padMenu;
     padViewPrev = padView;
 
@@ -1106,6 +1413,8 @@ const Input = (() => {
     s.mx = x;
     s.my = y;
     s.jumpHeld = !!keys.Space || padJumpPrev || touchJump;
+    // Hook ist ein HALDEN-Input: Maus (rechts), E/Q, Gamepad-Button oder Touch
+    s.hookHeld = !!keys.KeyE || !!keys.KeyQ || rightBtn || padHookPrev || touchHook;
     return s;
   }
 
@@ -1376,6 +1685,30 @@ const Renderer = {
     });
     this.boxGeo = new THREE.BoxGeometry(1, 1, 1);
 
+    // Plattform-Kanten (Wireframe Edges)
+    this.edgeMat = new THREE.LineBasicMaterial({ color: 0x7cf0c9, transparent: true, opacity: 0.45 });
+    this.edgesGeo = new THREE.EdgesGeometry(this.boxGeo);
+
+    // Grapple-Seil (dickes Zylinder-Mesh zwischen Hand und Ankerpunkt)
+    this.ropeGeo = new THREE.CylinderGeometry(0.045, 0.045, 1, 8, 1, true);
+    this.ropeMat = new THREE.MeshBasicMaterial({ color: 0x7cf0c9 });
+    this.ropeMesh = new THREE.Mesh(this.ropeGeo, this.ropeMat);
+    this.ropeMesh.visible = false;
+    this.ropeMesh.frustumCulled = false;
+    this.ropeUp = new THREE.Vector3(0, 1, 0);
+    this.ropeDir = new THREE.Vector3();
+    this.scene.add(this.ropeMesh);
+
+    // Schatten-Blob (kleiner dunkler Kreis unter Spieler)
+    this.shadowGeo = new THREE.CircleGeometry(0.5, 16);
+    this.shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false
+    });
+    this.shadowMesh = new THREE.Mesh(this.shadowGeo, this.shadowMat);
+    this.shadowMesh.rotation.x = -Math.PI / 2;
+    this.shadowMesh.visible = false;
+    this.scene.add(this.shadowMesh);
+
     this.setBackdrop(new SolidColorBackdrop());
     Character.init(this.scene);
 
@@ -1415,6 +1748,13 @@ const Renderer = {
     Character.setColor(d.pillColor || '#f5f7fb');
     Character.setAccent(d.platform);
 
+    // Edge & Rope colors
+    if (this.edgeMat) {
+      this.edgeMat.color.set(d.edgeColor || d.platform);
+      this.edgeMat.visible = d.showEdges !== false;
+    }
+    if (this.ropeMat) this.ropeMat.color.set(d.ropeColor || d.platform);
+
     const ret = $('reticle');
     ret.classList.toggle('hidden', !d.reticle && !d.showRing);
     ret.classList.toggle('hide-dot', !d.reticle);
@@ -1439,7 +1779,8 @@ const Renderer = {
     const effectivePitch = player.pitch + pitchOffsetRad;
 
     const speedH = Math.hypot(player.vx, player.vz);
-    const targetFov = this.baseFov + (player.dashT > 0 ? 13 : 0) + Math.min(5, speedH * 0.2);
+    const hookKick = player.hook ? 6 : 0;
+    const targetFov = this.baseFov + (player.dashT > 0 ? 13 : 0) + hookKick + Math.min(5, speedH * 0.2);
     this.fov += (targetFov - this.fov) * Math.min(1, dt * 10);
     if (Math.abs(c.fov - this.fov) > 0.02) {
       c.fov = this.fov;
@@ -1484,6 +1825,57 @@ const Renderer = {
     }
 
     Character.update(player, dt, is3rd);
+
+    // Shadow Blob (Raycast nach unten auf nächste Plattform)
+    this.shadowMesh.visible = false;
+    for (let i = 0; i < World.list.length; i++) {
+      const p = World.list[i];
+      if (p.y < player.y && Math.abs(player.x - p.x) < p.hw + 0.5 && Math.abs(player.z - p.z) < p.hd + 0.5) {
+        const dy = player.y - p.y;
+        if (dy < 16 && dy > 0.1) {
+          const scale = Math.max(0.3, 1.2 - dy * 0.08);
+          this.shadowMesh.scale.set(scale, scale, 1);
+          this.shadowMesh.position.set(player.x, p.y + 0.02, player.z);
+          this.shadowMat.opacity = Math.max(0.06, 0.22 - dy * 0.018);
+          this.shadowMesh.visible = true;
+          break;
+        }
+      }
+    }
+
+    // Grapple Rope (Zylinder zwischen Hand und Anker)
+    if (player.hook) {
+      const handY = player.y + (is3rd ? 1.0 : 1.4);
+      const ax = player.hook.x - player.x;
+      const ay = player.hook.y - handY;
+      const az = player.hook.z - player.z;
+      const len = Math.hypot(ax, ay, az);
+      if (len > 0.01) {
+        // Richtung zum Anker
+        this.ropeDir.set(ax / len, ay / len, az / len);
+        // Startpunkt versetzen: ohne Versatz läuft das Seil durch die Kamera
+        // und wird am Nah-Clip abgeschnitten. Der Versatz simuliert eine
+        // Hand-Position leicht rechts unten neben dem Blick.
+        let rx = -this.ropeDir.z, rz = this.ropeDir.x;
+        const rl = Math.hypot(rx, rz) || 1;
+        rx /= rl; rz /= rl;
+        const sx = player.x + this.ropeDir.x * 0.55 + rx * 0.15;
+        const sy = handY + this.ropeDir.y * 0.55 - 0.22;
+        const sz = player.z + this.ropeDir.z * 0.55 + rz * 0.15;
+        const segX = player.hook.x - sx, segY = player.hook.y - sy, segZ = player.hook.z - sz;
+        const segLen = Math.hypot(segX, segY, segZ);
+        if (segLen > 0.01) {
+          this.ropeDir.set(segX / segLen, segY / segLen, segZ / segLen);
+          this.ropeMesh.position.set(sx + segX * 0.5, sy + segY * 0.5, sz + segZ * 0.5);
+          this.ropeMesh.scale.set(1, segLen, 1);
+          this.ropeMesh.quaternion.setFromUnitVectors(this.ropeUp, this.ropeDir);
+          this.ropeMesh.visible = true;
+        }
+      }
+    } else {
+      this.ropeMesh.visible = false;
+    }
+
     this.backdrop.update(c, dt);
   },
 
@@ -1496,13 +1888,34 @@ const Renderer = {
    WORLD: Prozedurale Weltgenerierung & Direkte Live-Aktualisierung
    ========================================================================= */
 const World = {
-  AHEAD: 40,
-  BEHIND: 12,
+  AHEAD: 25,   // Plattformen vor dem Spieler (ca. 20-30)
+  BEHIND: 10,  // Letzte Plattformen hinter dem Spieler behalten
   TH: 1.6,
   list: [],
   first: 0,
   pool: [],
   rng: null,
+
+  // Exakter Ray-AABB-Test (Slab-Methode) gegen eine Plattform-Box.
+  // Liefert die Distanz zum nächsten Treffer oder null.
+  // Die Box reicht von p.y - TH (Unterkante) bis p.y (Oberfläche).
+  rayBox(ox, oy, oz, dx, dy, dz, p) {
+    const inv = v => (Math.abs(v) < 1e-9) ? (v < 0 ? -1e9 : 1e9) : 1 / v;
+    const ix = inv(dx), iy = inv(dy), iz = inv(dz);
+
+    let tmin = (p.x - p.hw - ox) * ix, tmax = (p.x + p.hw - ox) * ix;
+    if (tmin > tmax) { const t = tmin; tmin = tmax; tmax = t; }
+
+    let t1 = (p.y - World.TH - oy) * iy, t2 = (p.y - oy) * iy;
+    if (t1 > t2) { const t = t1; t1 = t2; t2 = t; }
+    tmin = Math.max(tmin, t1); tmax = Math.min(tmax, t2);
+
+    t1 = (p.z - p.hd - oz) * iz; t2 = (p.z + p.hd - oz) * iz;
+    if (t1 > t2) { const t = t1; t1 = t2; t2 = t; }
+    tmin = Math.max(tmin, t1); tmax = Math.min(tmax, t2);
+
+    return (tmax >= Math.max(tmin, 0)) ? Math.max(tmin, 0) : null;
+  },
 
   reset(seed) {
     this.list.forEach(p => this.release(p));
@@ -1519,6 +1932,12 @@ const World = {
     };
 
     this.heading = 0;
+    // Abwechslung: Steuerung der Hook-Sektionen (große Lücken, nur per Grapple)
+    this.lastHookGap = 0;
+    this.hookGapEvery = 8 + Math.floor(this.rand(0, 6));
+    // Auffänger-Plattformen (ca. 2x Größe, alle 10-15 Plattformen)
+    this.lastCatch = 0;
+    this.catchEvery = 10 + Math.floor(this.rand(0, 6));
     this.add({ x: 0, y: 0, z: 0, hw: 3.0, hd: 3.0 }, true);
   },
 
@@ -1554,6 +1973,15 @@ const World = {
     p.mesh = this.pool.pop() || new THREE.Mesh(Renderer.boxGeo, Renderer.platformMat);
     p.mesh.scale.set(p.hw * 2, this.TH, p.hd * 2);
     p.mesh.position.set(p.x, p.y - this.TH / 2 - (instant ? 0 : 12), p.z);
+
+    // Kanten-Linien
+    if (!p.mesh.userData.edgeLine) {
+      const edgeLine = new THREE.LineSegments(Renderer.edgesGeo, Renderer.edgeMat);
+      p.mesh.add(edgeLine);
+      p.mesh.userData.edgeLine = edgeLine;
+    }
+    p.mesh.userData.edgeLine.visible = Settings.data.showEdges !== false;
+
     Renderer.scene.add(p.mesh);
     this.list.push(p);
   },
@@ -1579,15 +2007,44 @@ const World = {
     const heightF = Settings.data.heightVar !== undefined ? Settings.data.heightVar : 1.0;
     const sizeF = Settings.data.sizeFactor !== undefined ? Settings.data.sizeFactor : 1.0;
 
-    const size = this.rand(2.2, 3.8) * (1 - 0.22 * prog) * sizeF;
+    // Abwechslung: Gelegentliche Hook-Sektionen mit besonders großen Lücken,
+    // die nur per Grapple-Hook zu überqueren sind (nur wenn Hook aktiviert).
+    let isHookGap = false;
+    if (Settings.data.grappleEnabled !== false && n > 5 &&
+        n - this.lastHookGap >= this.hookGapEvery) {
+      if (this.rand(0, 1) < 0.55) {
+        isHookGap = true;
+        this.lastHookGap = n;
+        this.hookGapEvery = 8 + Math.floor(this.rand(0, 6));
+      }
+    }
+
+    // Auffänger: alle 10-15 Plattformen eine ca. 2x so große Plattform,
+    // auf der man sicher landen/auftanken kann.
+    let isCatch = false;
+    if (!isHookGap && n - this.lastCatch >= this.catchEvery) {
+      isCatch = true;
+      this.lastCatch = n;
+      this.catchEvery = 10 + Math.floor(this.rand(0, 6));
+    }
+
+    const size = this.rand(2.2, 3.8) * (1 - 0.22 * prog) * sizeF *
+                 (isHookGap ? 1.4 : 1) * (isCatch ? 2 : 1);
     const hw = (size / 2) * this.rand(0.85, 1.15);
     const hd = (size / 2) * this.rand(0.85, 1.15);
 
-    const gap = this.rand(2.8, 5.0 + 2.0 * prog) * gapF;
+    let gap = this.rand(2.8, 5.0 + 2.0 * prog) * gapF;
+    if (isHookGap) {
+      // Große Lücke: innerhalb der einstellbaren Hook-Reichweite bleiben
+      const maxGap = (Settings.data.grappleRange || 32) - 9;
+      gap = this.rand(10.0, 13.0) * Math.max(1, gapF);
+      if (gap > maxGap) gap = Math.max(8, maxGap);
+    }
     const ext = (w, d) => Math.abs(dx) * w + Math.abs(dz) * d;
     const dist = ext(prev.hw, prev.hd) + ext(hw, hd) + gap;
 
     let dy = this.rand(-1.1, 0.7) * heightF;
+    if (isHookGap) dy *= 0.3; // Flacher halten, damit der Swing hinten drüber trägt
     if (prev.y > 6.0) dy -= 0.8 * heightF;
     else if (prev.y < -6.0) dy += 0.8 * heightF;
 
@@ -1634,7 +2091,7 @@ const Player = {
   GRAVITY: 18.5,
   JUMP: 9.2,
   R: 0.28,
-  DASH_SPEED: 19.5,
+  DASH_SPEED: 11.7, // ca. 60% der ursprünglichen Stärke
   DASH_TIME: 0.22,
   DASH_CD: 1.0,
 
@@ -1654,6 +2111,12 @@ const Player = {
   postDashFloat: 0,
   dip: 0,
 
+  // Grapple Hook
+  hook: null,        // { x, y, z } Ankerpunkt
+  ropeLen: 0,        // aktuelle Seillänge
+  hookTarget: null,  // Zielplattform für Reticle-Lock
+  hookCd: 0,         // kurzer Cooldown nach dem Lösen (Skill-Balance)
+
   currentPlatform: 0,
   penultimatePlatform: 0,
   maxReached: 0,
@@ -1668,6 +2131,9 @@ const Player = {
     this.grounded = true;
     this.coyote = 0.12;
     this.wallTimer = 0;
+    this.hook = null;
+    this.hookTarget = null;
+    this.hookCd = 0;
   },
 
   respawn() {
@@ -1734,17 +2200,39 @@ const Player = {
       this.vy = this.dashY * this.DASH_SPEED;
       this.vz = this.dashZ * this.DASH_SPEED;
     } else {
-      const tx = (fx * inp.my + rx * inp.mx) * this.SPEED;
-      const tz = (fz * inp.my + rz * inp.mx) * this.SPEED;
-      const ex = tx - this.vx, ez = tz - this.vz;
-      const dist = Math.hypot(ex, ez);
-      const maxAcc = (this.grounded ? 75 : 28) * dt;
-
-      if (dist <= maxAcc) {
-        this.vx = tx; this.vz = tz;
+      if (this.grounded) {
+        // Am Boden: Volle Kontrolle, sofort auf Zielgeschwindigkeit
+        const tx = (fx * inp.my + rx * inp.mx) * this.SPEED;
+        const tz = (fz * inp.my + rz * inp.mx) * this.SPEED;
+        const ex = tx - this.vx, ez = tz - this.vz;
+        const dist = Math.hypot(ex, ez);
+        const maxAcc = 75 * dt;
+        if (dist <= maxAcc) { this.vx = tx; this.vz = tz; }
+        else { this.vx += (ex / dist) * maxAcc; this.vz += (ez / dist) * maxAcc; }
       } else {
-        this.vx += (ex / dist) * maxAcc;
-        this.vz += (ez / dist) * maxAcc;
+        // In der Luft: Momentum erhalten! Nur beschleunigen, NICHT bremsen.
+        // Quake-Stil: Projiziere Wunsch auf aktuelle Richtung,
+        // füge nur Geschwindigkeit hinzu wenn unter SPEED in Wunschrichtung.
+        const wishX = (fx * inp.my + rx * inp.mx);
+        const wishZ = (fz * inp.my + rz * inp.mx);
+        const wishLen = Math.hypot(wishX, wishZ);
+        if (wishLen > 0.01) {
+          const wnx = wishX / wishLen, wnz = wishZ / wishLen;
+          const currentProj = this.vx * wnx + this.vz * wnz;
+          // Momentum-Aufbau: Ziel über SPEED hinaus erlauben (Dash-Schwung bleibt)
+          // und die Luftkontrolle deutlich erhöht für präzises Steuern.
+          const targetProj = this.SPEED * 1.35;
+          const maxAcc = this.hook ? 12 : 34;
+          const addSpeed = Math.min(targetProj - currentProj, maxAcc * dt);
+          if (addSpeed > 0) {
+            this.vx += wnx * addSpeed;
+            this.vz += wnz * addSpeed;
+          }
+        }
+        // Sehr leichte Luftreibung (behält ~99% pro Sekunde)
+        const airDrag = 1 - 0.08 * dt;
+        this.vx *= airDrag;
+        this.vz *= airDrag;
       }
 
       this.postDashFloat = Math.max(0, (this.postDashFloat || 0) - dt);
@@ -1782,12 +2270,101 @@ const Player = {
     this.z += this.vz * dt;
     this.y += this.vy * dt;
 
-    // Seitliche Kollision & Walljumps
+    // -------- GRAPPLE HOOK --------
+    // Exakter Raycast: Der Hook trifft GENAU den anvisierten Punkt.
+    // Der nächstgelegene Treffer gewinnt -> man kann nicht durch Plattformen durchschießen.
+    const grappleEnabled = Settings.data.grappleEnabled !== false;
+    const HOOK_RANGE = Settings.data.grappleRange || 32;
+    const HOOK_REEL = Settings.data.grappleReelSpeed || 6.5;
+    const headX = this.x, headY = this.y + 1.2, headZ = this.z;
+    const lookDirX = -Math.sin(this.yaw) * Math.cos(effectivePitch);
+    const lookDirY = Math.sin(effectivePitch);
+    const lookDirZ = -Math.cos(this.yaw) * Math.cos(effectivePitch);
+
+    this.hookTarget = null;
+    if (grappleEnabled && !this.hook) {
+      let bestT = HOOK_RANGE;
+      for (let i = 0; i < World.list.length; i++) {
+        const p = World.list[i];
+        // Grober Vorfilter per Umkreis, dann exakter Slab-Test
+        if (Math.abs(p.x - headX) > p.hw + bestT || Math.abs(p.z - headZ) > p.hd + bestT) continue;
+        const t = World.rayBox(headX, headY, headZ, lookDirX, lookDirY, lookDirZ, p);
+        if (t !== null && t > 1.0 && t < bestT) {
+          bestT = t;
+          this.hookTarget = { x: headX + lookDirX * t, y: headY + lookDirY * t, z: headZ + lookDirZ * t };
+        }
+      }
+    }
+
+    // Hook ist ein HALDEN-Input: aktiv nur solange die Taste gedrückt ist
+    this.hookCd = Math.max(0, this.hookCd - dt);
+    const hookCdMax = Settings.data.hookCd !== undefined ? Settings.data.hookCd : 0.5;
+    if (grappleEnabled && inp.hook) {
+      if (!this.hook && this.hookTarget && this.hookCd <= 0) {
+        // An genau dem anvisierten Punkt anhängen
+        this.hook = { x: this.hookTarget.x, y: this.hookTarget.y, z: this.hookTarget.z };
+        const hx = this.hook.x - this.x, hy = this.hook.y - headY, hz = this.hook.z - this.z;
+        this.ropeLen = Math.hypot(hx, hy, hz);
+        this.dashCd = 0; // Dash-Reset beim Hooksen (wie Celeste)
+        Sound.hookAttach();
+      }
+    } else if (this.hook) {
+      // Taste losgelassen -> Seil lösen
+      this.hook = null;
+      this.hookCd = hookCdMax;
+      Sound.hookRelease();
+    }
+
+    // Hook bei Sprung lösen (Lösen bei Landung passiert unten)
+    if (this.hook && (inp.jump || this.jumpBuf > 0)) {
+      this.hook = null;
+      this.hookCd = hookCdMax;
+      Sound.hookRelease();
+    }
+
+    // Seil-Constraint (Pendel-Physik)
+    if (this.hook) {
+      const headY = this.y + 1.2;
+      const hx = this.hook.x - this.x;
+      const hy = this.hook.y - headY;
+      const hz = this.hook.z - this.z;
+      const d = Math.hypot(hx, hy, hz);
+      if (d > 0.01) {
+        const nx = hx / d, ny = hy / d, nz = hz / d;
+        if (d > this.ropeLen) {
+          // Entferne Geschwindigkeit die vom Anker wegzeigt
+          const outVel = -(this.vx * nx + this.vy * ny + this.vz * nz);
+          if (outVel > 0) {
+            this.vx += nx * outVel;
+            this.vy += ny * outVel;
+            this.vz += nz * outVel;
+          }
+          // Position korrigieren
+          const k = d - this.ropeLen;
+          this.x += nx * k;
+          this.y += ny * k;
+          this.z += nz * k;
+        }
+        // Sanftes Einholen
+        this.ropeLen = Math.max(2.5, this.ropeLen - HOOK_REEL * dt);
+      }
+
+      // Luftkontrolle während Hook reduzieren (nicht gegen Schwung kämpfen)
+      // wird durch das Momentum-System oben schon natürlich gehandhabt
+    }
+    // -------- END GRAPPLE HOOK --------
+
+    // Seitliche Kollision & Walljumps.
+    // WICHTIG: Immer ALLE nahe Plattformen prüfen (Positionsfilter statt Index-Fenster).
+    // Bei weiten Hook-Schwüngen kann der Spieler Plattformen überspringen –
+    // ein Index-Fenster um currentPlatform würde dann Kollisionen verpassen.
     let touchingWall = false;
     let wallNormX = 0, wallNormZ = 0;
 
     for (let i = 0; i < World.list.length; i++) {
       const p = World.list[i];
+      // Grober Vorfilter: nur Plattformen in unmittelbarer Nähe
+      if (Math.abs(p.x - this.x) > p.hw + 1.0 || Math.abs(p.z - this.z) > p.hd + 1.0) continue;
       const isBeside = (this.y < p.y - 0.05) && (this.y + 1.35 > p.y - World.TH);
 
       if (isBeside) {
@@ -1819,11 +2396,13 @@ const Player = {
       this.wallTimer = Math.max(0, this.wallTimer - dt);
     }
 
-    // Landung
+    // Landung (gleicher Positionsfilter wie oben – verhindert Durchfliegen)
+    const wasGrounded = this.grounded;
     this.grounded = false;
     if (this.vy <= 0) {
       for (let i = 0; i < World.list.length; i++) {
         const p = World.list[i];
+        if (Math.abs(p.x - this.x) > p.hw + 1.0 || Math.abs(p.z - this.z) > p.hd + 1.0) continue;
         const onTopHoriz = Math.abs(this.x - p.x) <= p.hw + this.R * 0.75 &&
                            Math.abs(this.z - p.z) <= p.hd + this.R * 0.75;
 
@@ -1853,12 +2432,21 @@ const Player = {
 
     if (this.grounded) {
       this.dashCd = 0;
+      // Hook nur bei echter Landung lösen (nicht wenn er im Stand angehängt wurde)
+      if (this.hook && !wasGrounded) {
+        this.hook = null;
+        this.hookCd = Settings.data.hookCd !== undefined ? Settings.data.hookCd : 0.5;
+      }
     }
 
-    // Void Fall
+    // Void Fall (tiefer gelegt, damit man länger sieht, wohin man fällt)
     const currentRef = World.get(this.currentPlatform);
-    if (currentRef && this.y < currentRef.y - 14) {
-      this.respawn();
+    if (currentRef && this.y < currentRef.y - 30) {
+      if (Settings.data.gameMode === 'arcade') {
+        Game.triggerGameOver();
+      } else {
+        this.respawn();
+      }
     }
 
     this.dip *= Math.exp(-11 * dt);
@@ -1870,8 +2458,10 @@ const Player = {
    ========================================================================== */
 const Game = {
   paused: false,
+  gameOver: false,
   acc: 0,
   last: 0,
+  bestScore: 0,
   customBgFile: null,
   customBgIsVideo: false,
   customBgRepeatMode: 'repeat',
@@ -1880,6 +2470,9 @@ const Game = {
     Settings.load();
     Renderer.init();
 
+    // Bestwert laden
+    try { this.bestScore = parseInt(localStorage.getItem('infinidash_best') || '0', 10); } catch (e) {}
+
     Settings.onChange(d => Renderer.applyColors(d));
     Renderer.applyColors(Settings.data);
 
@@ -1887,8 +2480,76 @@ const Game = {
     Player.spawnAt(World.list[0]);
 
     this.initUI();
+    this.syncBestScore();
+
+    // Modus-Auswahl beim Start anzeigen
+    this.showModeSelect();
+
     this.last = performance.now();
     requestAnimationFrame(t => this.frame(t));
+  },
+
+  syncBestScore() {
+    $('bestScoreBadge').textContent = 'BEST ' + this.bestScore;
+    $('modalBestArcade').textContent = this.bestScore > 0 ? 'Best ' + this.bestScore : '';
+  },
+
+  showModeSelect() {
+    this.gameOver = false;
+    $('gameOverModal').style.display = 'none';
+    this.paused = true;
+    this.syncBestScore();
+    $('modeModal').style.display = 'flex';
+    if (document.exitPointerLock) document.exitPointerLock();
+  },
+
+  selectMode(mode) {
+    Settings.set({ gameMode: mode });
+    $('modeModal').style.display = 'none';
+    this.gameOver = false;
+    this.paused = false;
+
+    const badge = $('modeBadge');
+    badge.textContent = mode === 'arcade' ? 'ARCADE' : 'ENTSPANNT';
+
+    this.restartRun();
+  },
+
+  restartRun() {
+    $('gameOverModal').style.display = 'none';
+    this.gameOver = false;
+    this.paused = false;
+    Player.maxReached = 0;
+    Player.currentPlatform = 0;
+    Player.penultimatePlatform = 0;
+    World.reset((Math.random() * 4294967296) >>> 0);
+    Player.spawnAt(World.list[0]);
+    this.updateScore(0);
+    this.flash();
+  },
+
+  triggerGameOver() {
+    this.gameOver = true;
+    this.paused = true;
+
+    const score = Player.maxReached;
+    const isNewRecord = score > this.bestScore;
+
+    if (isNewRecord) {
+      this.bestScore = score;
+      try { localStorage.setItem('infinidash_best', String(score)); } catch (e) {}
+      Sound.newRecord();
+    } else {
+      Sound.gameOver();
+    }
+
+    $('finalScoreVal').textContent = score;
+    $('finalBestVal').textContent = 'BEST ' + this.bestScore;
+    $('newRecordBanner').style.display = isNewRecord ? 'block' : 'none';
+    $('gameOverModal').style.display = 'flex';
+
+    this.syncBestScore();
+    if (document.exitPointerLock) document.exitPointerLock();
   },
 
   updateScore(val) {
@@ -1912,6 +2573,8 @@ const Game = {
   },
 
   togglePanel(forceState) {
+    // Panel während Game Over oder im Hauptmenü nicht öffnen/schließen
+    if (this.gameOver || $('modeModal').style.display !== 'none') return;
     const panel = $('panel');
     const open = (forceState !== undefined) ? forceState : !panel.classList.contains('open');
     this.paused = open;
@@ -1929,12 +2592,12 @@ const Game = {
     const inp = Input.update(dt);
     const s = Input.state;
 
-    if (!this.paused) {
+    if (!this.paused && !this.gameOver) {
       Player.look(s.lookX, s.lookY);
     }
     s.lookX = s.lookY = 0;
 
-    if (!this.paused) {
+    if (!this.paused && !this.gameOver) {
       this.acc += dt;
       const H = 1 / 120;
       let jump = s.jumpEdge, dash = s.dashEdge;
@@ -1945,7 +2608,8 @@ const Game = {
           my: inp.my,
           jumpHeld: inp.jumpHeld,
           jump,
-          dash
+          dash,
+          hook: inp.hookHeld
         });
         jump = dash = false;
         this.acc -= H;
@@ -2022,6 +2686,39 @@ const Game = {
       $('btnPerspToggle').textContent = is3P ? '3rd Person' : '1st Person';
       $('btnPerspToggle').classList.toggle('active', is3P);
 
+      // Kanten
+      const edgesOn = Settings.data.showEdges !== false;
+      $('btnEdgeToggle').textContent = edgesOn ? 'An' : 'Aus';
+      $('btnEdgeToggle').classList.toggle('active', edgesOn);
+      $('cEdge').value = Settings.data.edgeColor || Settings.data.platform;
+
+      // Seilfarbe
+      $('cRope').value = Settings.data.ropeColor || Settings.data.platform;
+
+      // Modus Badge
+      const gm = Settings.data.gameMode || 'arcade';
+      $('btnModeToggle').textContent = gm === 'arcade' ? 'Arcade' : 'Entspannt';
+      $('btnModeToggle').classList.toggle('active', gm === 'arcade');
+
+      // Grapple
+      const grapple = Settings.data.grappleEnabled !== false;
+      $('btnGrappleToggle').textContent = grapple ? 'An' : 'Aus';
+      $('btnGrappleToggle').classList.toggle('active', grapple);
+      $('grappleRangeSlider').value = Settings.data.grappleRange || 32;
+      $('valGrappleRange').textContent = (Settings.data.grappleRange || 32) + 'm';
+      $('grappleSpeedSlider').value = Settings.data.grappleReelSpeed || 6.5;
+      $('valGrappleSpeed').textContent = (Settings.data.grappleReelSpeed || 6.5).toFixed(1) + 'm/s';
+
+      // Hook-Cooldown
+      const hookCdVal = Settings.data.hookCd !== undefined ? Settings.data.hookCd : 0.5;
+      $('grappleCdSlider').value = hookCdVal;
+      $('valGrappleCd').textContent = hookCdVal.toFixed(1) + 's';
+
+      // Grapple rows visibility
+      $('rowGrappleRange').style.display = grapple ? 'flex' : 'none';
+      $('rowGrappleSpeed').style.display = grapple ? 'flex' : 'none';
+      $('rowGrappleCd').style.display = grapple ? 'flex' : 'none';
+
       Renderer.resize();
     };
     syncUI();
@@ -2079,6 +2776,8 @@ const Game = {
       dot.onclick = () => Settings.set({
         bg: p.bg,
         platform: p.platform,
+        edgeColor: p.edge || p.platform,
+        ropeColor: p.rope || p.platform,
         reticleColor: p.dot || '#ffffff',
         ringColor: p.ring || p.platform,
         pillColor: p.pill || '#f5f7fb'
@@ -2146,10 +2845,64 @@ const Game = {
 
     $('gear').onclick = () => this.togglePanel();
 
+    // Mode Badge öffnet Modus-Auswahl
+    $('modeBadge').onclick = () => this.showModeSelect();
+
+    // Hauptmenü: linke Hälfte Arcade, rechte Hälfte Entspannt
+    $('btnSelectArcade').onclick = () => this.selectMode('arcade');
+    $('btnSelectCasual').onclick = () => this.selectMode('casual');
+
+    // Game Over: Klick irgendwo = neuer Run, Esc = Modus-Auswahl
+    $('gameOverModal').addEventListener('click', () => {
+      if (this.gameOver) this.restartRun();
+    });
+
+    // Kanten Toggle + Farbe
+    $('btnEdgeToggle').onclick = () => {
+      const next = !(Settings.data.showEdges !== false);
+      Settings.set({ showEdges: next });
+      World.list.forEach(p => {
+        if (p.mesh && p.mesh.userData.edgeLine) p.mesh.userData.edgeLine.visible = next;
+      });
+    };
+    $('cEdge').oninput = e => Settings.set({ edgeColor: e.target.value });
+    $('cRope').oninput = e => Settings.set({ ropeColor: e.target.value });
+
+    // Modus Toggle im Settings Welt-Tab
+    $('btnModeToggle').onclick = () => {
+      const next = Settings.data.gameMode === 'arcade' ? 'casual' : 'arcade';
+      this.selectMode(next);
+    };
+
+    // Grapple Toggle + Sliders
+    $('btnGrappleToggle').onclick = () => {
+      Settings.set({ grappleEnabled: !Settings.data.grappleEnabled });
+      // Welt vor dem Spieler neu generieren: Hook-Sektionen
+      // entfallen/erscheinen je nach Einstellung
+      World.regenerateAhead(Player.currentPlatform);
+    };
+    $('grappleRangeSlider').oninput = e => {
+      Settings.set({ grappleRange: parseInt(e.target.value, 10) });
+    };
+    $('grappleSpeedSlider').oninput = e => {
+      Settings.set({ grappleReelSpeed: parseFloat(e.target.value) });
+    };
+    $('grappleCdSlider').oninput = e => {
+      Settings.set({ hookCd: parseFloat(e.target.value) });
+    };
+
     addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT') return;
       if (e.code === 'KeyP') this.togglePanel();
-      else if (e.code === 'Escape') this.togglePanel(false);
+      else if (e.code === 'Escape') {
+        if (this.gameOver) this.showModeSelect();
+        else this.togglePanel(false);
+      }
+      // Leertaste oder R im Game Over = Retry
+      if (this.gameOver && (e.code === 'Space' || e.code === 'KeyR')) {
+        e.preventDefault();
+        this.restartRun();
+      }
     });
 
     $('c').addEventListener('pointerdown', () => {
