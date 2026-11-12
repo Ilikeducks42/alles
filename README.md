@@ -46,3 +46,8 @@
 <https://ilikeducks42.github.io/alles/Bridge-builder.html>
 
 *Baue Brücken.*
+
+## Infiniadsh
+<https://ilikeducks42.github.io/alles/infinidash.html>
+
+*Unendliches Jump n Run.*
