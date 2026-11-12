@@ -47,7 +47,7 @@
 
 *Baue Brücken.*
 
-## Infiniadsh
+## Infinidash
 <https://ilikeducks42.github.io/alles/infinidash.html>
 
 *Unendliches Jump n Run.*
