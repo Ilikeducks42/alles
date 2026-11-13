@@ -753,6 +753,23 @@ body[data-input="touch"] #touch { display: block; }
         <span class="panel-label">∡ Neigung O/U <span class="panel-val" id="valBgRotX">0°</span></span>
         <input type="range" id="bgRotXSlider" min="-90" max="90" step="2">
       </div>
+      <!-- Mapping: Geschwindigkeit (nur Video), Skalierung, Verschiebung -->
+      <div class="panel-row" id="bgSpeedRow" style="display:none">
+        <span class="panel-label">Geschwindigkeit <span class="panel-val" id="valBgSpeed">1.0x</span></span>
+        <input type="range" id="bgSpeedSlider" min="0.25" max="2.0" step="0.05">
+      </div>
+      <div class="panel-row" id="bgScaleRow" style="display:none">
+        <span class="panel-label">Skalierung <span class="panel-val" id="valBgScale">1.0x</span></span>
+        <input type="range" id="bgScaleSlider" min="0.5" max="4.0" step="0.1">
+      </div>
+      <div class="panel-row" id="bgOffsetXRow" style="display:none">
+        <span class="panel-label">Verschiebung X <span class="panel-val" id="valBgOffsetX">0.00</span></span>
+        <input type="range" id="bgOffsetXSlider" min="-1" max="1" step="0.05">
+      </div>
+      <div class="panel-row" id="bgOffsetYRow" style="display:none">
+        <span class="panel-label">Verschiebung Y <span class="panel-val" id="valBgOffsetY">0.00</span></span>
+        <input type="range" id="bgOffsetYSlider" min="-1" max="1" step="0.05">
+      </div>
     </div>
   </div>
 
@@ -1051,6 +1068,10 @@ const Settings = {
     bgRotY: 0,
     bgRotX: 0,
     videoAudio: false,
+    bgVideoSpeed: 1.0,
+    bgScale: 1.0,
+    bgOffsetX: 0,
+    bgOffsetY: 0,
     fov: 75,
     pitchOffset: 0,
     thirdPerson: false,
@@ -1481,7 +1502,9 @@ class MediaBackdrop extends BackdropBase {
     this.uniforms = {
       map: { value: this.dummyTexture },
       fogColor: { value: this.fogColor },
-      uvRepeat: { value: new THREE.Vector2(this.repeatMode === 'repeat' ? 2 : 1, 1) }
+      uvRepeat: { value: new THREE.Vector2(this.repeatMode === 'repeat' ? 2 : 1, 1) },
+      uvScale: { value: new THREE.Vector2(1, 1) },
+      uvOffset: { value: new THREE.Vector2(0, 0) }
     };
 
     const vert = `
@@ -1500,11 +1523,15 @@ class MediaBackdrop extends BackdropBase {
       uniform sampler2D map;
       uniform vec3 fogColor;
       uniform vec2 uvRepeat;
+      uniform vec2 uvScale;
+      uniform vec2 uvOffset;
       varying vec2 vUv;
       varying vec3 vLocalDir;
       varying vec3 vWorldDir;
       void main() {
-        vec2 uv = vec2(fract(vUv.x * uvRepeat.x), vUv.y * uvRepeat.y);
+        vec2 uv = vUv;
+        uv = (uv - 0.5) / uvScale + 0.5 + uvOffset;
+        uv = vec2(fract(uv.x * uvRepeat.x), uv.y * uvRepeat.y);
         vec4 tex = texture2D(map, uv);
         float localY = normalize(vLocalDir).y;
         float worldY = normalize(vWorldDir).y;
@@ -1568,6 +1595,7 @@ class MediaBackdrop extends BackdropBase {
       v.loop = true;
       v.muted = !Settings.data.videoAudio;
       v.playsInline = true;
+      v.playbackRate = Settings.data.bgVideoSpeed || 1.0;
       v.play().catch(() => {});
       this.videoEl = v;
       this.texture = new THREE.VideoTexture(v);
@@ -1618,6 +1646,17 @@ class MediaBackdrop extends BackdropBase {
       const rotY = ((Settings.data.bgRotY || 0) * Math.PI) / 180;
       const rotX = ((Settings.data.bgRotX || 0) * Math.PI) / 180;
       this.sphere.rotation.set(rotX, rotY, 0);
+
+       // Mapping: Skalierung & Verschiebung live aus den Einstellungen
+       const sc = Settings.data.bgScale || 1.0;
+       if (this.uniforms && this.uniforms.uvScale) {
+         this.uniforms.uvScale.value.set(sc, sc);
+         this.uniforms.uvOffset.value.set(Settings.data.bgOffsetX || 0, Settings.data.bgOffsetY || 0);
+       }
+       if (this.isVideo && this.videoEl) {
+         const sp = Settings.data.bgVideoSpeed || 1.0;
+         if (this.videoEl.playbackRate !== sp) this.videoEl.playbackRate = sp;
+       }
     }
     if (this.isVideo && this.videoEl && !this.videoEl.paused && this.videoEl.readyState >= 2) {
       this.sampleTimer = (this.sampleTimer || 0) + dt;
@@ -2678,6 +2717,20 @@ const Game = {
       $('bgRotXSlider').value = Settings.data.bgRotX || 0;
       $('valBgRotX').textContent = (Settings.data.bgRotX || 0) + '°';
 
+      // Mapping-Slider (Video-Geschwindigkeit, Skalierung, Verschiebung)
+      const bgSpeed = Settings.data.bgVideoSpeed || 1.0;
+      $('bgSpeedSlider').value = bgSpeed;
+      $('valBgSpeed').textContent = bgSpeed.toFixed(2) + 'x';
+      const bgScale = Settings.data.bgScale || 1.0;
+      $('bgScaleSlider').value = bgScale;
+      $('valBgScale').textContent = bgScale.toFixed(1) + 'x';
+      const bgOx = Settings.data.bgOffsetX || 0;
+      $('bgOffsetXSlider').value = bgOx;
+      $('valBgOffsetX').textContent = bgOx.toFixed(2);
+      const bgOy = Settings.data.bgOffsetY || 0;
+      $('bgOffsetYSlider').value = bgOy;
+      $('valBgOffsetY').textContent = bgOy.toFixed(2);
+
       const vAud = !!Settings.data.videoAudio;
       $('btnBgAudio').textContent = vAud ? 'Ton An' : 'Stumm';
       $('btnBgAudio').classList.toggle('active', vAud);
@@ -2804,11 +2857,21 @@ const Game = {
       $('bgModeRow').style.display = 'flex';
       $('bgRotYRow').style.display = 'flex';
       $('bgRotXRow').style.display = 'flex';
+      $('bgSpeedRow').style.display = this.customBgIsVideo ? 'flex' : 'none';
+      $('bgScaleRow').style.display = 'flex';
+      $('bgOffsetXRow').style.display = 'flex';
+      $('bgOffsetYRow').style.display = 'flex';
       $('bgAudioRow').style.display = this.customBgIsVideo ? 'flex' : 'none';
     };
 
     $('bgRotYSlider').oninput = e => Settings.set({ bgRotY: parseInt(e.target.value, 10) });
     $('bgRotXSlider').oninput = e => Settings.set({ bgRotX: parseInt(e.target.value, 10) });
+
+    // Mapping: Geschwindigkeit, Skalierung, Verschiebung
+    $('bgSpeedSlider').oninput = e => Settings.set({ bgVideoSpeed: parseFloat(e.target.value) });
+    $('bgScaleSlider').oninput = e => Settings.set({ bgScale: parseFloat(e.target.value) });
+    $('bgOffsetXSlider').oninput = e => Settings.set({ bgOffsetX: parseFloat(e.target.value) });
+    $('bgOffsetYSlider').oninput = e => Settings.set({ bgOffsetY: parseFloat(e.target.value) });
 
     $('btnBgAudio').onclick = () => {
       const nextAudio = !Settings.data.videoAudio;
@@ -2834,6 +2897,10 @@ const Game = {
       $('bgModeRow').style.display = 'none';
       $('bgRotYRow').style.display = 'none';
       $('bgRotXRow').style.display = 'none';
+      $('bgSpeedRow').style.display = 'none';
+      $('bgScaleRow').style.display = 'none';
+      $('bgOffsetXRow').style.display = 'none';
+      $('bgOffsetYRow').style.display = 'none';
       $('bgAudioRow').style.display = 'none';
       $('bgFileInput').value = '';
     };
