@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kamerachat</title>
+<style>
+:root{--bg:#10131a;--fg:#e9ecf1;--mut:#8a93a3;--ok:#35d07f;--mid:#f2b441;--pan:#1a1f2a}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#000;color:var(--fg);font:15px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#stage{background:#000;flex:none;height:min(100vw,46vh);display:flex;align-items:center;justify-content:center}
+#code{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+#chat{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+@media(orientation:landscape) and (min-width:700px){#app{flex-direction:row}#stage{height:100%;width:min(100vh,50vw)}#chat{border-left:1px solid #222}}
+#bar{display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--pan);border-bottom:1px solid #262c39}
+#vid{width:88px;height:66px;object-fit:cover;border-radius:8px;background:#000;flex:none}
+#st{flex:1;min-width:0;font-size:13px}
+#stats{display:block;color:var(--mut);font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#555;margin-right:5px;vertical-align:baseline}
+.dot.on{background:var(--ok)}.dot.mid{background:var(--mid)}
+button,select,input{font:inherit;color:inherit}
+button{background:#2a3142;border:0;border-radius:10px;padding:9px 12px;cursor:pointer}
+button:active{background:#39425a}
+#set{padding:8px 12px;background:var(--pan);display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font-size:13px;border-bottom:1px solid #262c39}
+#set[hidden]{display:none}
+select,#set input[type=range]{width:100%}
+select{background:#2a3142;border:0;border-radius:8px;padding:6px}
+#msgs{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;padding:8px 0}
+.m{max-width:86%;padding:8px 12px;border-radius:14px;margin:3px 10px;word-break:break-word;background:#262c3a;align-self:flex-start}
+.m.out{align-self:flex-end;background:#1d4a8a}
+.m.fail{opacity:.5}
+.m img{display:block;max-width:100%;max-height:200px;margin-top:6px;border-radius:8px}
+.m a{color:#9cc8ff}
+.m small{opacity:.7}
+.pb{height:4px;background:#0004;border-radius:2px;margin-top:6px}
+.pb i{display:block;height:100%;width:0;background:var(--ok);border-radius:2px}
+#f{display:flex;gap:8px;padding:8px 10px;background:var(--pan);border-top:1px solid #262c39}
+#txt{flex:1;min-width:0;background:#10131a;border:1px solid #303850;border-radius:10px;padding:9px 12px}
+#intro{position:fixed;inset:0;background:#0b0e14;display:flex;align-items:center;justify-content:center;padding:24px;z-index:9}
+#intro div{max-width:460px}
+#intro h1{font-size:26px;margin:0 0 12px}
+#intro p{color:#b9c0cd;margin:8px 0}
+#intro button{background:#2f7cf6;margin-top:14px;padding:13px 22px;font-weight:600}
+#err{color:#ff8a8a}
+</style></head><body>
+<div id="app">
+ <div id="stage"><canvas id="code"></canvas></div>
+ <div id="chat">
+  <div id="bar">
+   <video id="vid" playsinline muted autoplay></video>
+   <div id="st"><div><i class="dot" id="d1"></i>Ich sehe ihn &nbsp;<i class="dot" id="d2"></i>Er sieht mich</div><span id="stats"></span></div>
+   <button id="flip" title="Kamera wechseln">Kamera ⟲</button><button id="gear" title="Einstellungen">⚙</button>
+  </div>
+  <div id="set" hidden>
+   <label for="nsel">Zellen</label><select id="nsel"></select>
+   <label for="fps">Tempo</label><input type="range" id="fps" min="3" max="30" step="1">
+   <label for="wl">Weißpegel</label><input type="range" id="wl" min="110" max="255" step="5">
+   <label for="au">Automatik</label><label><input type="checkbox" id="au" checked> Zellgröße und Tempo selbst anpassen</label>
+  </div>
+  <div id="msgs"></div>
+  <form id="f"><button type="button" id="att" title="Datei senden">📎</button><input id="txt" autocomplete="off" placeholder="Nachricht"><button>Senden</button><input type="file" id="file" multiple hidden></form>
+ </div>
+</div>
+<div id="intro"><div>
+ <h1>Chat ohne Netz, nur über Kameras</h1>
+ <p>Jedes Gerät zeigt einen Bildcode und liest mit der Kamera den Code des anderen. Nachrichten und Dateien laufen in beide Richtungen gleichzeitig.</p>
+ <p>Beide Geräte öffnen diese Datei und tippen auf Start. Bildschirme einander zuwenden, sodass jede Kamera den Code des anderen etwa halbbildfüllend sieht (ca. 15–30 cm). Bildschirmhelligkeit auf Maximum. Mit „Kamera ⟲“ wechselst du zwischen Front- und Rückkamera.</p>
+ <button id="go">Start</button><p id="err"></p>
+</div></div>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const enc=new TextEncoder(),dec=new TextDecoder();
+const cv=$('#code'),ctx=cv.getContext('2d'),stage=$('#stage'),vid=$('#vid'),msgs=$('#msgs');
+const NS=[32,40,48,64,80];
+let lv=2,fps=12,white=255,auto=true,facing='user',stream=null,img,px;
+let sid=0;const rs=()=>{let v;do v=1+(Math.random()*65535|0);while(v>65535||v===sid);return v};sid=rs();
+let peerSid=0;
+// ---------- Sende-/Empfangszustand ----------
+let out=new Uint8Array(1<<16),outLen=0,peerAck=0,cyc=0,outItems=[];
+let rx=new Uint8Array(1<<16),rxLen=0,pp=0,cur=null;const segs=new Map();
+let lastOk=0,lastSees=0,seenT=0,okF=0,rxTot=0,txTot=0,lastV=0,lastN=48;
+const grow=(a,n)=>{if(n<=a.length)return a;let m=a.length;while(m<n)m*=2;const b=new Uint8Array(m);b.set(a);return b};
+// ---------- CRC & Geometrie-Caches ----------
+const CT=new Uint32Array(256);for(let i=0;i<256;i++){let c=i;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;CT[i]=c>>>0}
+function crc32(b,s,e){let c=-1;for(let i=s;i<e;i++)c=CT[(c^b[i])&255]^(c>>>8);return(c^-1)>>>0}
+const cache={};
+function geo(n){
+ if(cache[n])return cache[n];
+ const C=(n*n-16)>>3,cells=[];
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(!((x<2||x>=n-2)&&(y<2||y>=n-2)))cells.push(y*n+x);
+ let s=0x9E3779B9|0;const wh=new Uint8Array(C);
+ for(let i=0;i<C;i++){s^=s<<13;s^=s>>>17;s^=s<<5;wh[i]=(s>>>24)&255}
+ const maps=[];
+ for(let v=0;v<8;v++){const m=new Int32Array(C*8);
+  for(let k=0;k<C*8;k++){const c=cells[k];let x=c%n,y=(c/n)|0;if(v&4)x=n-1-x;for(let r=v&3;r>0;r--){const t=x;x=n-1-y;y=t}m[k]=y*n+x}
+  maps.push(m)}
+ return cache[n]={n,C,cells,wh,maps};
+}
+// ---------- Bild senden ----------
+function render(){
+ const n=NS[lv],g=geo(n),C=g.C,L=C-18,b=new Uint8Array(C),dv=new DataView(b.buffer);
+ let off=0,len=0;const un=outLen-peerAck;
+ if(un>0){const nc=Math.min(8,Math.ceil(un/L));off=peerAck+(cyc++%nc)*L;len=Math.min(L,outLen-off);b.set(out.subarray(off,off+len),14)}
+ dv.setUint16(0,sid,true);dv.setUint32(2,off,true);dv.setUint32(6,rxLen>>>0,true);dv.setUint16(10,peerSid,true);dv.setUint16(12,len,true);
+ dv.setUint32(C-4,crc32(b,0,C-4),true);
+ for(let i=0;i<C;i++)b[i]^=g.wh[i];
+ const S=n+2;
+ if(cv.width!==S){cv.width=cv.height=S;img=ctx.createImageData(S,S);px=new Uint32Array(img.data.buffer);layout()}
+ px.fill(0xFF000000|(white*0x010101));
+ const K=0xFF000000;
+ for(let k=0;k<C*8;k++)if(b[k>>3]&(128>>(k&7))){const c=g.cells[k];px[((c/n|0)+1)*S+(c%n)+1]=K}
+ for(let k=C*8;k<g.cells.length;k++)if(k&1){const c=g.cells[k];px[((c/n|0)+1)*S+(c%n)+1]=K}
+ for(const cx of[0,n-2])for(const cy of[0,n-2]){px[(cy+1)*S+cx+1]=K;px[(cy+2)*S+cx+2]=K}
+ ctx.putImageData(img,0,0);
+}
+function layout(){
+ const S=cv.width||50,a=Math.min(stage.clientWidth,stage.clientHeight)-12,d=devicePixelRatio||1;
+ const k=Math.floor(a*d/S);cv.style.width=cv.style.height=(k>=1?k*S/d:a)+'px';
+}
+addEventListener('resize',layout);
+function tick(){try{render()}catch(e){console.error(e)}setTimeout(tick,1000/fps)}
+// ---------- Kamera lesen ----------
+const WW=800;let wc=document.createElement('canvas'),wx=wc.getContext('2d',{willReadFrequently:true});
+let G,LAB,ST,gw=0,gh=0;const KK=new Int32Array(8);
+function grab(){
+ const vw=vid.videoWidth,vh=vid.videoHeight;if(!vw)return false;
+ const s=Math.min(1,WW/vw),w=Math.round(vw*s),h=Math.round(vh*s);
+ if(w!==gw||h!==gh){gw=wc.width=w;gh=wc.height=h;G=new Uint8Array(w*h);LAB=new Int32Array(w*h);ST=new Int32Array(w*h)}
+ wx.drawImage(vid,0,0,gw,gh);
+ const d=wx.getImageData(0,0,gw,gh).data;
+ for(let i=0,j=0;j<G.length;i+=4,j++)G[j]=(d[i]*77+d[i+1]*150+d[i+2]*29)>>8;
+ return true;
+}
+function otsu(){
+ const h=new Uint32Array(256);for(let i=0;i<G.length;i+=3)h[G[i]]++;
+ let tot=0,sum=0;for(let i=0;i<256;i++){tot+=h[i];sum+=i*h[i]}
+ let wB=0,sB=0,mx=0,t=128;
+ for(let i=0;i<256;i++){wB+=h[i];if(!wB)continue;const wF=tot-wB;if(!wF)break;sB+=i*h[i];const mB=sB/wB,mF=(sum-sB)/wF,v=wB*wF*(mB-mF)*(mB-mF);if(v>mx){mx=v;t=i}}
+ return t;
+}
+function blobs(t){
+ const n=gw*gh,minA=n*.003,res=[];LAB.fill(0);let id=0;
+ for(let s=0;s<n;s++){
+  if(G[s]<=t||LAB[s])continue;
+  id++;let sp=0,a=0;ST[sp++]=s;LAB[s]=id;
+  const bv=[-1e9,-1e9,-1e9,-1e9,-1e9,-1e9,-1e9,-1e9],bi=[0,0,0,0,0,0,0,0];
+  while(sp){
+   const p=ST[--sp];a++;const x=p%gw,y=(p/gw)|0;
+   KK[0]=x;KK[1]=-x;KK[2]=y;KK[3]=-y;KK[4]=x+y;KK[5]=-x-y;KK[6]=x-y;KK[7]=y-x;
+   for(let j=0;j<8;j++)if(KK[j]>bv[j]){bv[j]=KK[j];bi[j]=p}
+   if(x>0&&G[p-1]>t&&!LAB[p-1]){LAB[p-1]=id;ST[sp++]=p-1}
+   if(x<gw-1&&G[p+1]>t&&!LAB[p+1]){LAB[p+1]=id;ST[sp++]=p+1}
+   if(y>0&&G[p-gw]>t&&!LAB[p-gw]){LAB[p-gw]=id;ST[sp++]=p-gw}
+   if(y<gh-1&&G[p+gw]>t&&!LAB[p+gw]){LAB[p+gw]=id;ST[sp++]=p+gw}
+  }
+  if(a>=minA)res.push({id,a,ex:bi});
+ }
+ res.sort((p,q)=>q.a-p.a);return res.slice(0,3);
+}
+function pickQuad(ex){
+ const P=[],seen=new Set();
+ for(const i of ex)if(!seen.has(i)){seen.add(i);P.push([i%gw,(i/gw)|0])}
+ if(P.length<4)return null;
+ let best=null,ba=0;
+ for(let a=0;a<P.length;a++)for(let b=a+1;b<P.length;b++)for(let c=b+1;c<P.length;c++)for(let d=c+1;d<P.length;d++){
+  const q=[P[a],P[b],P[c],P[d]],cx=(q[0][0]+q[1][0]+q[2][0]+q[3][0])/4,cy=(q[0][1]+q[1][1]+q[2][1]+q[3][1])/4;
+  q.sort((p,r)=>Math.atan2(p[1]-cy,p[0]-cx)-Math.atan2(r[1]-cy,r[0]-cx));
+  let A=0;for(let i=0;i<4;i++){const u=q[i],v=q[(i+1)&3];A+=u[0]*v[1]-v[0]*u[1]}
+  A=Math.abs(A)/2;if(A>ba){ba=A;best=q}
+ }
+ if(!best)return null;
+ const sd=[];for(let i=0;i<4;i++)sd.push(Math.hypot(best[i][0]-best[(i+1)&3][0],best[i][1]-best[(i+1)&3][1]));
+ if(Math.min(...sd)<.5*Math.max(...sd))return null;
+ return{q:best,area:ba};
+}
+function fitLine(p){
+ const n=p.length/2;let mx=0,my=0;for(let i=0;i<p.length;i+=2){mx+=p[i];my+=p[i+1]}mx/=n;my/=n;
+ let sxx=0,sxy=0,syy=0;for(let i=0;i<p.length;i+=2){const x=p[i]-mx,y=p[i+1]-my;sxx+=x*x;sxy+=x*y;syy+=y*y}
+ const th=.5*Math.atan2(2*sxy,sxx-syy);return[mx,my,Math.cos(th),Math.sin(th)];
+}
+function refine(id,Q){
+ const xs=Q.map(p=>p[0]),ys=Q.map(p=>p[1]);
+ const x0=Math.max(1,Math.floor(Math.min(...xs))-3),x1=Math.min(gw-2,Math.ceil(Math.max(...xs))+3);
+ const y0=Math.max(1,Math.floor(Math.min(...ys))-3),y1=Math.min(gh-2,Math.ceil(Math.max(...ys))+3);
+ const pts=[[],[],[],[]],cx=xs.reduce((a,b)=>a+b)/4,cy=ys.reduce((a,b)=>a+b)/4;
+ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+  const p=y*gw+x;if(LAB[p]!==id)continue;
+  if(LAB[p-1]===id&&LAB[p+1]===id&&LAB[p-gw]===id&&LAB[p+gw]===id)continue;
+  let bd=1e9,bk=-1,bl=0;
+  for(let k=0;k<4;k++){
+   const A=Q[k],B=Q[(k+1)&3],ex=B[0]-A[0],ey=B[1]-A[1],len=Math.hypot(ex,ey);
+   const t=((x-A[0])*ex+(y-A[1])*ey)/(len*len);if(t<.12||t>.88)continue;
+   const d=Math.abs((x-A[0])*ey-(y-A[1])*ex)/len;if(d<bd){bd=d;bk=k;bl=len}
+  }
+  if(bk>=0&&bd<Math.max(2.5,bl*.012))pts[bk].push(x,y);
+ }
+ const L=[];
+ for(let k=0;k<4;k++){
+  if(pts[k].length<16)return Q;
+  const l=fitLine(pts[k]);let nx=-l[3],ny=l[2];
+  if((l[0]-cx)*nx+(l[1]-cy)*ny<0){nx=-nx;ny=-ny}
+  l[0]+=.5*nx;l[1]+=.5*ny;L.push(l);
+ }
+ const R=[];
+ for(let k=0;k<4;k++){
+  const a=L[(k+3)&3],b=L[k],cr=a[2]*b[3]-a[3]*b[2];
+  if(Math.abs(cr)<.2)return Q;
+  const t=((b[0]-a[0])*b[3]-(b[1]-a[1])*b[2])/cr;R.push([a[0]+t*a[2],a[1]+t*a[3]]);
+ }
+ return R;
+}
+function sq2quad(P){
+ const[x0,y0]=P[0],[x1,y1]=P[1],[x2,y2]=P[2],[x3,y3]=P[3];
+ const dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
+ const den=dx1*dy2-dx2*dy1;if(Math.abs(den)<1e-9)return null;
+ const g=(dx3*dy2-dx2*dy3)/den,h=(dx1*dy3-dx3*dy1)/den;
+ const a=x1-x0+g*x1,b=x3-x0+h*x3,d=y1-y0+g*y1,e=y3-y0+h*y3;
+ return(u,v,o)=>{const w=g*u+h*v+1;o[0]=(a*u+b*v+x0)/w;o[1]=(d*u+e*v+y0)/w};
+}
+function samp(x,y){
+ if(x<0||y<0||x>=gw-1||y>=gh-1)return 0;
+ const ix=x|0,iy=y|0,fx=x-ix,fy=y-iy,i=iy*gw+ix;
+ return(G[i]*(1-fx)+G[i+1]*fx)*(1-fy)+(G[i+gw]*(1-fx)+G[i+gw+1]*fx)*fy;
+}
+const OO=[0,0];
+function readGrid(map,n){
+ const S=n+2,v=new Float32Array(n*n);
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){map((x+1.5)/S,(y+1.5)/S,OO);v[y*n+x]=samp(OO[0],OO[1])}
+ const cm=(x,y)=>(v[y*n+x]+v[y*n+x+1]+v[(y+1)*n+x]+v[(y+1)*n+x+1])/4;
+ const a=cm(0,0),b=cm(n-2,0),c=cm(0,n-2),d=cm(n-2,n-2),raw=new Uint8Array(n*n);
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+  const tx=x/(n-1),ty=y/(n-1),t=a*(1-tx)*(1-ty)+b*tx*(1-ty)+c*(1-tx)*ty+d*tx*ty;
+  raw[y*n+x]=v[y*n+x]<t?1:0;
+ }
+ return raw;
+}
+function decodeBits(raw,n){
+ const g=geo(n),C=g.C;
+ for(let vi=0;vi<8;vi++){
+  const v=(vi+lastV)&7,m=g.maps[v],b=new Uint8Array(C);
+  for(let k=0;k<C*8;k++)if(raw[m[k]])b[k>>3]|=128>>(k&7);
+  for(let i=0;i<C;i++)b[i]^=g.wh[i];
+  if(crc32(b,0,C-4)===new DataView(b.buffer).getUint32(C-4,true)){lastV=v;return b}
+ }
+ return null;
+}
+function proc(){
+ if(!grab())return;
+ const t0=otsu();let found=false;
+ const ord=[lastN,...NS.filter(x=>x!==lastN)];
+ for(const th of[t0,t0*.75]){
+  for(const bl of blobs(th|0)){
+   const pq=pickQuad(bl.ex);if(!pq)continue;
+   const r=bl.a/pq.area;if(r<.3||r>1.1)continue;
+   const map=sq2quad(refine(bl.id,pq.q));if(!map)continue;
+   seenT=performance.now();
+   for(const n of ord){const f=decodeBits(readGrid(map,n),n);if(f){lastN=n;onFrame(f);found=true;break}}
+   if(found)break;
+  }
+  if(found)break;
+ }
+}
+// ---------- Protokoll ----------
+function onFrame(b){
+ const dv=new DataView(b.buffer),s=dv.getUint16(0,true),off=dv.getUint32(2,true),ack=dv.getUint32(6,true),ps=dv.getUint16(10,true),len=dv.getUint16(12,true);
+ if(s===0||s===sid||len>b.length-18)return;
+ const now=performance.now();lastOk=now;okF++;
+ if(s!==peerSid){if(peerSid){rxReset();if(ps!==sid)txReset()}peerSid=s}
+ if(ps===sid){lastSees=now;if(ack>peerAck&&ack<=outLen){txTot+=ack-peerAck;peerAck=ack;updOut()}}
+ if(!len)return;
+ const d=b.slice(14,14+len);
+ if(off<=rxLen){if(off+len>rxLen)app(d.subarray(rxLen-off))}
+ else if(off<rxLen+(1<<18)&&segs.size<256)segs.set(off,d);
+ let again=true;
+ while(again){again=false;for(const[o,dd]of segs){
+  if(o+dd.length<=rxLen)segs.delete(o);
+  else if(o<=rxLen){app(dd.subarray(rxLen-o));segs.delete(o);again=true;break}
+ }}
+ parse();
+}
+function app(d){rx=grow(rx,rxLen+d.length);rx.set(d,rxLen);rxLen+=d.length;rxTot+=d.length}
+function rxReset(){rxLen=0;pp=0;segs.clear();if(cur&&cur.el)cur.el.classList.add('fail');cur=null}
+function txReset(){sid=rs();outLen=0;peerAck=0;cyc=0;for(const it of outItems)if(!it.done)it.el.classList.add('fail');outItems=[]}
+function enqueue(type,meta,data){
+ const m=enc.encode(meta),tot=7+m.length+data.length;
+ out=grow(out,outLen+tot);const dv=new DataView(out.buffer);let o=outLen;
+ out[o]=type;dv.setUint16(o+1,m.length,true);out.set(m,o+3);dv.setUint32(o+3+m.length,data.length,true);out.set(data,o+7+m.length);
+ const s=outLen;outLen+=tot;return[s,outLen];
+}
+function updOut(){
+ for(const it of outItems){
+  if(it.done)continue;
+  const f=Math.min(1,Math.max(0,(peerAck-it.s)/(it.e-it.s)));
+  if(it.bar)it.bar.style.width=f*100+'%';
+  if(peerAck>=it.e){it.done=true;it.tk.textContent='✓'}
+ }
+}
+function parse(){
+ for(;;){
+  if(!cur){
+   if(rxLen-pp<3)return;
+   const dv=new DataView(rx.buffer),type=rx[pp],ml=dv.getUint16(pp+1,true);
+   if(rxLen-pp<7+ml)return;
+   let meta={};try{meta=JSON.parse(dec.decode(rx.subarray(pp+3,pp+3+ml))||'{}')}catch(e){}
+   cur={type,meta,dl:dv.getUint32(pp+3+ml,true),start:pp+7+ml,el:null,bar:null};
+   if(type!==1){cur.el=bubble('in');cur.el.innerHTML='';const t=document.createElement('div');t.textContent='📄 '+(meta.n||'Datei')+' ('+fmt(meta.s||cur.dl)+')';cur.el.append(t);const pb=document.createElement('div');pb.className='pb';cur.bar=document.createElement('i');pb.append(cur.bar);cur.el.append(pb)}
+  }
+  const have=Math.min(cur.dl,rxLen-cur.start);
+  if(cur.bar)cur.bar.style.width=(cur.dl?have/cur.dl*100:100)+'%';
+  if(have<cur.dl)return;
+  const it=cur,data=rx.slice(it.start,it.start+it.dl);pp=it.start+it.dl;cur=null;deliver(it,data);
+ }
+}
+async function deliver(it,data){
+ if(it.type===1){const e=bubble('in');e.textContent=dec.decode(data);return}
+ try{
+  if(it.type===3)data=await run(data,new DecompressionStream('deflate-raw'));
+  const blob=new Blob([data],{type:it.meta.t||'application/octet-stream'}),url=URL.createObjectURL(blob);
+  const e=it.el;e.querySelector('.pb').remove();
+  const a=document.createElement('a');a.href=url;a.download=it.meta.n||'datei';a.textContent='Speichern';e.append(a);
+  if((it.meta.t||'').startsWith('image/')){const im=document.createElement('img');im.src=url;e.append(im)}
+ }catch(err){it.el.classList.add('fail')}
+}
+const run=async(u8,t)=>new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(t)).arrayBuffer());
+// ---------- UI ----------
+function bubble(c){const d=document.createElement('div');d.className='m '+c;msgs.append(d);msgs.scrollTop=msgs.scrollHeight;return d}
+const fmt=n=>n<1024?n+' B':n<1048576?(n/1024).toFixed(n<10240?1:0)+' KB':(n/1048576).toFixed(1)+' MB';
+function sendText(t){
+ const[s,e]=enqueue(1,'',enc.encode(t));
+ const el=bubble('out');el.textContent=t+' ';const tk=document.createElement('small');tk.textContent='…';el.append(tk);
+ outItems.push({s,e,el,tk,bar:null,done:false});
+}
+async function sendFile(f){
+ if(f.size>150000&&!confirm(f.name+' ist '+fmt(f.size)+'. Das dauert bei ca. 1,5 KB/s etwa '+Math.ceil(f.size/1500/60)+' Min. Senden?'))return;
+ let data=new Uint8Array(await f.arrayBuffer()),type=2;
+ if(window.CompressionStream&&data.length>64){try{const z=await run(data,new CompressionStream('deflate-raw'));if(z.length<data.length*.95){data=z;type=3}}catch(e){}}
+ const[s,e]=enqueue(type,JSON.stringify({n:f.name,t:f.type,s:f.size}),data);
+ const el=bubble('out');const t=document.createElement('div');t.textContent='📄 '+f.name+' ('+fmt(f.size)+') ';const tk=document.createElement('small');tk.textContent='…';t.append(tk);
+ const pb=document.createElement('div');pb.className='pb';const bar=document.createElement('i');pb.append(bar);el.append(t,pb);
+ outItems.push({s,e,el,tk,bar,done:false});
+}
+$('#f').onsubmit=e=>{e.preventDefault();const t=$('#txt').value.trim();if(t){sendText(t);$('#txt').value=''}};
+$('#att').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{for(const f of e.target.files)await sendFile(f);e.target.value=''};
+$('#gear').onclick=()=>{$('#set').hidden=!$('#set').hidden;layout()};
+const nsel=$('#nsel');NS.forEach((n,i)=>nsel.add(new Option(n+' × '+n+' ('+((n*n-16>>3)-18)+' B/Bild)',i)));
+function syncUI(){nsel.value=lv;$('#fps').value=fps;$('#wl').value=white;$('#au').checked=auto}
+nsel.onchange=()=>{lv=+nsel.value;auto=false;syncUI()};
+$('#fps').oninput=e=>{fps=+e.target.value;auto=false;syncUI()};
+$('#wl').oninput=e=>{white=+e.target.value};
+$('#au').onchange=e=>{auto=e.target.checked};
+syncUI();
+async function startCam(){
+ if(stream)stream.getTracks().forEach(t=>t.stop());
+ stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60},advanced:[{focusMode:'continuous'}]}});
+ vid.srcObject=stream;await vid.play();
+ const fm=stream.getVideoTracks()[0].getSettings().facingMode;
+ vid.style.transform=(fm?fm==='user':facing==='user')?'scaleX(-1)':'none';
+}
+$('#flip').onclick=()=>{facing=facing==='user'?'environment':'user';startCam().catch(e=>alert('Kamera: '+e.message))};
+$('#go').onclick=async()=>{
+ try{
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('Kamerazugriff nicht verfügbar. Seite über HTTPS oder als lokale Datei in Chrome/Safari öffnen.');
+  try{await navigator.wakeLock.request('screen')}catch(e){}
+  await startCam();
+  $('#intro').remove();layout();tick();
+  if('requestVideoFrameCallback'in vid){const cb=()=>{try{proc()}catch(e){console.error(e)}vid.requestVideoFrameCallback(cb)};vid.requestVideoFrameCallback(cb)}
+  else{const cb=()=>{try{proc()}catch(e){}requestAnimationFrame(cb)};requestAnimationFrame(cb)}
+ }catch(e){$('#err').textContent=e.message}
+};
+// ---------- Status & Automatik ----------
+let pRx=0,pTx=0,pOk=0,lastAck=0,stallT=0,upT=0;
+setInterval(()=>{
+ const n=performance.now();
+ $('#d1').className='dot '+(n-lastOk<1500?'on':n-seenT<1500?'mid':'');
+ $('#d2').className='dot '+(n-lastSees<1500?'on':'');
+ $('#stats').textContent='↓ '+fmt((rxTot-pRx)*2)+'/s  ↑ '+fmt((txTot-pTx)*2)+'/s  '+(okF-pOk)*2+' Bilder/s  '+NS[lv]+'² @ '+fps;
+ pRx=rxTot;pTx=txTot;pOk=okF;
+ if(outLen-peerAck<=0){stallT=upT=n;lastAck=peerAck;return}
+ if(peerAck!==lastAck){lastAck=peerAck;stallT=n}
+ if(!auto)return;
+ if(n-stallT>3000){if(lv>0)lv--;else fps=Math.max(4,fps-3);stallT=upT=n;syncUI()}
+ else if(n-upT>15000){if(fps<12)fps+=2;else if(lv<3)lv++;upT=n;syncUI()}
+},500);
+</script></body></html>
