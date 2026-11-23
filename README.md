@@ -51,3 +51,8 @@
 <https://ilikeducks42.github.io/alles/infinidash.html>
 
 *Unendliches Jump n Run.*
+
+## Kamerachat
+<https://ilikeducks42.github.io/alles/kamerachat.html>
+
+*Chat zwischen Geräten nur über die Kamera*
