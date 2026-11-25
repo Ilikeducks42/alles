@@ -56,3 +56,8 @@
 <https://ilikeducks42.github.io/alles/kamerachat.html>
 
 *Chat zwischen Geräten nur über die Kamera*
+
+## KI-Studio
+<https://ilikeducks42.github.io/alles/KI-Studio.html>
+
+*Erstelle und exportiere eigene Machine Learning modelle*
