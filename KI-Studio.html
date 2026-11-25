@@ -218,47 +218,7 @@ textarea{height:auto;min-height:86px;padding:10px 11px;resize:vertical;line-heig
 /* ============================================================
    HOME
    ============================================================ */
-.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(330px,.82fr);gap:clamp(30px,6vw,90px);align-items:center;padding:54px 0 38px;min-height:530px}
-.hero-copy{max-width:620px}
-.hero h1{font-size:clamp(40px,5.1vw,64px);line-height:1.01;letter-spacing:-.05em;font-weight:610;margin:19px 0 21px}
-.hero .lead{color:var(--ink-2);font-size:16px;line-height:1.65;max-width:47ch}
-.hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin:29px 0 22px}
-.hero-notes{display:flex;gap:18px;flex-wrap:wrap;color:var(--ink-3);font-size:11.5px}
-.hero-notes span{display:inline-flex;align-items:center;gap:5px}
-.hero-notes .ic{width:13px;height:13px;color:var(--good)}
-.demo{position:relative;width:100%;max-width:430px;margin-left:auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow-lg);transform:rotate(1.4deg);transition:transform .7s var(--ease),box-shadow .7s var(--ease);animation:demoIn 1s var(--ease) both}
-.demo:hover{transform:rotate(0) translateY(-5px)}
-.demo-head{display:flex;align-items:center;justify-content:space-between;padding:2px 3px 12px;font-size:10.5px;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase}
-.demo-live{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2)}
-.demo-live i{width:5px;height:5px;border-radius:50%;background:var(--good);animation:softPulse 1.8s infinite}
-.demo-head .mono{font-size:10px;letter-spacing:0;text-transform:none}
-.demo-frame{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:linear-gradient(150deg,#1a1a20,#0a0a0d 70%);border:1px solid rgba(255,255,255,.07)}
-.demo-cam,.demo-fps{position:absolute;z-index:2;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);font-family:"SFMono-Regular",Consolas,monospace}
-.demo-cam{left:12px;top:11px}
-.demo-fps{right:12px;bottom:10px;letter-spacing:0}
-.demo-shape{position:absolute;left:50%;top:50%;width:116px;height:116px;transform:translate(-50%,-50%);border-radius:50%;border:1.5px solid rgba(255,255,255,.75);box-shadow:0 0 0 14px rgba(255,255,255,.035),0 0 70px rgba(141,137,255,.3);animation:float 6.5s ease-in-out infinite}
-.demo-shape::before{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);border-radius:50%;background:var(--accent);box-shadow:0 0 30px rgba(141,137,255,.65)}
-.demo-shape::after{content:"";position:absolute;left:50%;top:-15px;width:1px;height:calc(100% + 30px);background:linear-gradient(180deg,transparent,rgba(255,255,255,.2),transparent)}
-.demo-scan{position:absolute;left:8%;right:8%;top:18%;height:1px;background:linear-gradient(90deg,transparent,rgba(141,137,255,.65),transparent);animation:scan 5.5s ease-in-out infinite}
-.corner{position:absolute;width:18px;height:18px;border-color:rgba(255,255,255,.32);border-style:solid;z-index:2}
-.corner.tl{left:16px;top:16px;border-width:1px 0 0 1px}
-.corner.tr{right:16px;top:16px;border-width:1px 1px 0 0}
-.corner.bl{left:16px;bottom:16px;border-width:0 0 1px 1px}
-.corner.br{right:16px;bottom:16px;border-width:0 1px 1px 0}
-.demo-preds{display:flex;flex-direction:column;gap:9px;padding:15px 3px 4px}
-.dp{display:grid;grid-template-columns:66px minmax(0,1fr) 34px;align-items:center;gap:9px;font-size:11.5px;color:var(--ink-2)}
-.dp b{font-size:10.5px;text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums;font-weight:550}
-.dp-track{height:5px;border-radius:999px;background:var(--surface-3);overflow:hidden}
-.dp-track i{display:block;height:100%;background:var(--accent);border-radius:inherit;animation:barBreathe 5s ease-in-out infinite}
-.dp:nth-child(2) .dp-track i{background:var(--ink-3);animation-delay:.8s}
-.dp:nth-child(3) .dp-track i{background:var(--ink-3);animation-delay:1.6s}
-.demo-pill{position:absolute;right:-14px;bottom:37px;display:flex;align-items:center;gap:9px;padding:9px 12px 9px 9px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);animation:float 7.4s ease-in-out infinite reverse}
-.demo-check{width:26px;height:26px;border-radius:8px;background:var(--good-soft);color:var(--good);display:grid;place-items:center}
-.demo-check .ic{width:15px;height:15px}
-.demo-pill>span:last-child{display:flex;flex-direction:column;line-height:1.35}
-.demo-pill b{font-size:11px;font-weight:600}
-.demo-pill small{font-size:9.5px;color:var(--ink-3)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0 12px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:0 0 18px}
 .stat{padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm)}
 .stat span{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
 .stat strong{display:block;font-size:25px;line-height:1;letter-spacing:-.04em;font-weight:600;font-variant-numeric:tabular-nums}
@@ -491,7 +451,12 @@ textarea{height:auto;min-height:86px;padding:10px 11px;resize:vertical;line-heig
 .train-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;align-items:start}
 .train-col{display:flex;flex-direction:column;gap:18px;min-width:0}
 .params{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.params .field:last-child{grid-column:1/-1}
+.auto-train-box{margin-top:12px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);display:flex;flex-direction:column;gap:9px}
+.auto-train-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.auto-train-head b{font-size:12px;font-weight:600}
+.auto-train-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.auto-train-runs{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.auto-train-runs .input{width:68px;height:30px;padding:0 8px;font-size:12px;text-align:center}
 .train-check{display:flex;flex-direction:column;gap:7px}
 .check-class{display:grid;grid-template-columns:8px minmax(0,1fr) auto;align-items:center;gap:9px;font-size:11.5px}
 .check-class .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2)}
@@ -707,18 +672,12 @@ textarea{height:auto;min-height:86px;padding:10px 11px;resize:vertical;line-heig
 @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(79,70,229,.18)}50%{box-shadow:0 0 0 6px rgba(79,70,229,0)}}
 @keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes barBreathe{0%,100%{opacity:1}50%{opacity:.65}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes demoIn{from{opacity:0;transform:translateY(14px) rotate(3deg)}to{opacity:1;transform:rotate(1.4deg)}}
-@keyframes scan{0%,100%{top:16%;opacity:0}15%{opacity:.9}50%{top:84%;opacity:.6}85%{opacity:0}}
 @keyframes wavePlay{from{transform:scaleY(.55)}to{transform:scaleY(1.08)}}
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
 @media(max-width:1180px){
-  .hero{grid-template-columns:1fr;gap:34px;min-height:0;padding-top:38px}
-  .demo{margin:0;max-width:460px}
   .split,.split.wide-right{grid-template-columns:1fr}
   .capture-col{position:static;order:-1}
   .train-grid{grid-template-columns:1fr}
@@ -741,8 +700,6 @@ textarea{height:auto;min-height:86px;padding:10px 11px;resize:vertical;line-heig
   .theme-btn{width:44px;height:44px;border:0;background:transparent}
 .theme-btn span{display:none}
   .main{padding:0 18px 94px}
-  .hero{padding-top:30px}
-  .hero h1{font-size:clamp(38px,9vw,54px)}
   .stats{gap:8px}
   .stat{padding:12px 13px}
   .stat strong{font-size:21px}
@@ -757,14 +714,7 @@ textarea{height:auto;min-height:86px;padding:10px 11px;resize:vertical;line-heig
 }
 @media(max-width:620px){
   .main{padding:0 14px 92px}
-  .hero{gap:24px}
-  .hero h1{font-size:38px;letter-spacing:-.045em}
-  .hero .lead{font-size:14px}
-  .hero-actions .btn{flex:1;min-width:140px}
-  .demo{display:none}
   .stats{grid-template-columns:1fr 1fr;gap:7px}
-  .stat:last-child{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:10px 13px}
-  .stat:last-child span{margin:0}.stat:last-child strong{font-size:17px}.stat:last-child small{margin:0;margin-left:auto}
   .section-head{margin-top:26px}
   .mode-grid{grid-template-columns:1fr 1fr;gap:8px}
   .mode-card{min-height:154px;padding:13px;gap:10px}
@@ -805,7 +755,6 @@ textarea{height:auto;min-height:86px;padding:10px 11px;resize:vertical;line-heig
 
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
-  .demo{transform:none}
 }
 
 </style>
@@ -833,45 +782,19 @@ textarea{height:auto;min-height:86px;padding:10px 11px;resize:vertical;line-heig
 
   <main class="main">
     <section class="view" id="view-home">
-      <div class="hero">
-        <div class="hero-copy">
-          <span class="eyebrow"><span class="eyebrow-dot"></span>Lokales Trainingsstudio</span>
-          <h1>Modelle trainieren,<br>die dir gehören.</h1>
-          <p class="lead">Fünf Werkzeuge für Text, Bild, Pose und Stimme. Alles lernt im Browser – deine Daten verlassen dieses Gerät nicht.</p>
-          <div class="hero-actions">
-            <button class="btn primary lg" data-action="open-mode" data-mode="image">Bildmodell starten <svg class="ic"><use href="#i-arrow-right"/></svg></button>
-            <button class="btn ghost lg" data-action="nav" data-view="models">Modelle ansehen</button>
-          </div>
-          <div class="hero-notes">
-            <span><svg class="ic"><use href="#i-check"/></svg>Kein Konto</span>
-            <span><svg class="ic"><use href="#i-check"/></svg>Keine Cloud</span>
-            <span><svg class="ic"><use href="#i-check"/></svg>Exportierbar</span>
-          </div>
+      <div class="page-head">
+        <div>
+          <h1>KI Studio</h1>
+          <p>Lokal trainieren für Text, Bild, Pose und Stimme – alle Daten bleiben auf diesem Gerät.</p>
         </div>
-        <div class="demo" aria-hidden="true">
-          <div class="demo-head"><span class="demo-live"><i></i>Live-Inferenz</span><span class="mono">32 ms</span></div>
-          <div class="demo-frame">
-            <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
-            <span class="demo-cam">Kamera 01</span>
-            <span class="demo-fps mono">30 fps</span>
-            <div class="demo-shape"></div>
-            <div class="demo-scan"></div>
-          </div>
-          <div class="demo-preds">
-            <div class="dp"><span>Kreis</span><div class="dp-track"><i style="width:86%"></i></div><b>86%</b></div>
-            <div class="dp"><span>Quadrat</span><div class="dp-track"><i style="width:9%"></i></div><b>9%</b></div>
-            <div class="dp"><span>Dreieck</span><div class="dp-track"><i style="width:5%"></i></div><b>5%</b></div>
-          </div>
-          <div class="demo-pill">
-            <span class="demo-check"><svg class="ic"><use href="#i-check"/></svg></span>
-            <span><b>Modell bereit</b><small>3 Klassen · lokal gespeichert</small></span>
-          </div>
+        <div class="page-head-actions">
+          <button class="btn" data-action="nav" data-view="models"><svg class="ic"><use href="#i-layers"/></svg>Modelle</button>
         </div>
       </div>
 
       <div class="stats" id="home-stats"></div>
 
-      <div class="section-head"><h2>Trainingsmodi</h2><span class="muted">Wähle einen Modus</span></div>
+      <div class="section-head"><h2>Trainingsmodi</h2></div>
       <div class="mode-grid" id="mode-grid"></div>
 
       <div class="section-head"><h2>Zuletzt verwendet</h2><button class="link" data-action="nav" data-view="models">Alle Modelle <svg class="ic"><use href="#i-arrow-right"/></svg></button></div>
@@ -1052,11 +975,18 @@ const MODES = {
     offline: 'Offline-Basis, Keypoints online', kind: 'classifier'
   },
   text: {
-    title: 'Text', icon: 'text', sub: 'Klassifikation & Generator',
-    desc: 'Texte klassifizieren und aus deinem eigenen Korpus Text generieren.',
-    long: 'Hashed N-Gramme + MLP. Generator als n-Gramm-Modell.',
-    method: 'Texte werden als gehashte Wort- und Zeichen-N-Gramme kodiert und klassifiziert. Die Textgenerierung nutzt ein lokal trainiertes n-Gramm-Sprachmodell.',
+    title: 'Text', icon: 'text', sub: 'Klassifikation',
+    desc: 'Texte in eigene Klassen einordnen – lokal trainiert.',
+    long: 'Hashed N-Gramme + MLP. Vollständig offline.',
+    method: 'Texte werden als gehashte Wort- und Zeichen-N-Gramme kodiert und ein mehrschichtiges neuronales Netz klassifiziert sie in deine Klassen.',
     offline: 'Vollständig offline', kind: 'classifier'
+  },
+  textgen: {
+    title: 'Textgenerator', icon: 'text', sub: 'Texte fortsetzen',
+    desc: 'Aus deinem eigenen Korpus Texte generieren und fortsetzen.',
+    long: 'n-Gramm-Sprachmodell. Vollständig offline.',
+    method: 'Ein n-Gramm-Sprachmodell lernt Wortfolgen aus deinen Texten und setzt Prompts in deinem Stil fort.',
+    offline: 'Vollständig offline', kind: 'generator'
   },
   stt: {
     title: 'Sprache', icon: 'mic', sub: 'Eigene Wörter erkennen',
@@ -1073,7 +1003,7 @@ const MODES = {
     offline: 'Vollständig offline', kind: 'voice'
   }
 };
-const MODE_ORDER = ['image', 'pose', 'text', 'stt', 'tts'];
+const MODE_ORDER = ['image', 'pose', 'text', 'textgen', 'stt', 'tts'];
 const CLASS_COLORS = ['#5b67d8', '#c07a3e', '#2f8f7a', '#c05a76', '#4a86b8', '#8a7a35', '#7a5fa8', '#4f8f4a', '#b05545', '#4f7f92'];
 
 /* ============================================================
@@ -1096,6 +1026,7 @@ const S = {
   saving: {},
   lastTrain: null,
   trainRunning: false, trainCancel: false,
+  autoTrainRunning: false, autoTrainRuns: 15, autoTrainVary: true,
   ui: { modelMenu: null }
 };
 
@@ -1175,6 +1106,7 @@ function blankDataset(mode) {
   let names;
   if (mode === 'tts') names = ['Meine Stimme'];
   else if (mode === 'stt') names = ['Ja', 'Nein'];
+  else if (mode === 'textgen') names = ['Texte'];
   else names = ['Klasse 1', 'Klasse 2'];
   return {
     mode, version: 1, updatedAt: now(),
@@ -1236,6 +1168,11 @@ function sampleText(s) {
 function toast(message, type = 'default', ms = 3400) {
   const wrap = $('#toasts');
   if (!wrap) return;
+  while (wrap.children.length >= 2) {
+    const first = wrap.firstElementChild;
+    if (!first) break;
+    first.remove();
+  }
   const t = document.createElement('div');
   t.className = 'toast ' + type;
   t.innerHTML = `${icon(type === 'error' ? 'alert' : type === 'success' ? 'check' : 'info')}<span>${esc(message)}</span>`;
@@ -1433,8 +1370,7 @@ function updateHomeStats() {
   const used = S.storage.used || 0;
   box.innerHTML = `
     <div class="stat"><span>Modelle</span><strong>${fnum(S.models.length)}</strong><small>lokal gespeichert</small></div>
-    <div class="stat"><span>Trainingsbeispiele</span><strong>${fnum(totalSamples)}</strong><small>über alle Modi</small></div>
-    <div class="stat"><span>Speicher</span><strong>${used ? fmtBytes(used) : '—'}</strong><small>IndexedDB auf diesem Gerät</small></div>`;
+    <div class="stat"><span>Trainingsbeispiele</span><strong>${fnum(totalSamples)}</strong><small>über alle Modi</small></div>`;
 }
 async function refreshStorage() {
   try {
@@ -2121,13 +2057,13 @@ function inspectTraining(mode, ds) {
   if (mode === 'image' || mode === 'pose') {
     const dom = dominantFeatureSpec(ds, mode);
     if (dom) { spec = dom.spec; dim = dom.dim; }
-  } else if (mode === 'text') { spec = 'text-v1'; dim = TEXT_DIM; }
+  } else if (mode === 'text' || mode === 'textgen') { spec = 'text-v1'; dim = TEXT_DIM; }
   else if (mode === 'stt') { spec = 'mfcc-v1'; dim = MFCC_DIM; }
   for (const c of ds.classes) {
     let count = 0, raw = 0;
     for (const s of c.samples) {
       raw++;
-      if (mode === 'text') { if (sampleText(s).trim()) count++; else ignored++; }
+      if (mode === 'text' || mode === 'textgen') { if (sampleText(s).trim()) count++; else ignored++; }
       else if (mode === 'stt') { if (s.pcm && s.pcm.length) count++; else ignored++; }
       else if (s.f && s.f.length) {
         const sSpec = s.fs || (mode === 'pose' ? 'pose-app-v1' : 'img-v1');
@@ -2190,8 +2126,28 @@ async function prepareTraining(mode, ds, onStatus) {
   return { X, y, classes: used, inputDim: 0, spec: null, ignored: inspect.ignored, total: X.length };
 }
 function defaultParams() { return { epochs: 100, lr: .008, batchSize: 16, hidden: 64, l2: .0001, valSplit: .2 }; }
+function autoParams(mode, ds) {
+  if (mode === 'tts' || mode === 'textgen') return defaultParams();
+  const base = defaultParams();
+  const insp = inspectTraining(mode, ds);
+  const n = insp.total || 0;
+  const classes = insp.classes.length || 2;
+  // Small datasets: fewer epochs, slightly higher lr
+  if (n < 12) { base.epochs = 80; base.lr = .006; base.hidden = 32; base.valSplit = 0; }
+  else if (n < 40) { base.epochs = 120; base.lr = .005; base.hidden = 48; base.valSplit = .15; }
+  else if (n < 120) { base.epochs = 150; base.lr = .004; base.hidden = 64; base.valSplit = .2; }
+  else { base.epochs = 200; base.lr = .003; base.hidden = 96; base.valSplit = .2; }
+  // More classes -> more hidden neurons
+  if (classes >= 5) base.hidden = Math.min(256, base.hidden + 16);
+  // Batch size adapted to data
+  base.batchSize = Math.min(32, Math.max(4, Math.round(n / 6) || 8));
+  return base;
+}
 function getParams(mode) {
-  if (!S.params[mode]) S.params[mode] = { ...defaultParams() };
+  if (!S.params[mode]) {
+    const ds = (typeof activeDataset === 'function') ? activeDataset() : null;
+    S.params[mode] = ds ? autoParams(mode, ds) : { ...defaultParams() };
+  }
   return S.params[mode];
 }
 
@@ -2221,6 +2177,80 @@ function stratifiedSplit(y, nClasses, valSplit) {
   }
   return { train, val };
 }
+async function trainSingleRun({ mode, prep, p, onEpoch }) {
+  const t0 = performance.now();
+  const net = new Net({ inputDim: prep.inputDim, hidden: [Math.max(4, p.hidden)], classes: prep.classes.length });
+  const split = stratifiedSplit(prep.y, prep.classes.length, p.valSplit);
+  if (!split.train.length) throw new Error('Keine Trainingsdaten nach dem Split.');
+  const useVal = split.val.length >= Math.max(4, prep.classes.length * 2);
+  let best = { loss: Infinity, snap: null }, bad = 0, early = false;
+  const history = [];
+  const totalEpochs = Math.max(1, p.epochs);
+  for (let epoch = 1; epoch <= totalEpochs; epoch++) {
+    if (S.trainCancel) { early = true; break; }
+    shuffle(split.train);
+    for (let b = 0; b < split.train.length; b += p.batchSize) {
+      const batch = split.train.slice(b, b + p.batchSize);
+      net.zeroGrads();
+      for (const i of batch) { net._forward(prep.X[i]); net.backward(prep.y[i]); }
+      net.applyGrads(p.lr, p.l2, batch.length);
+      if (b % (p.batchSize * 20) === 0) await sleep(0);
+      if (S.trainCancel) break;
+    }
+    const trainIdx = split.train.length > 320 ? split.train.slice(0, 320) : split.train;
+    const tr = evaluateNet(net, prep.X, prep.y, trainIdx);
+    const va = split.val.length ? evaluateNet(net, prep.X, prep.y, split.val) : tr;
+    history.push({ epoch, loss: tr.loss, acc: tr.acc, valLoss: useVal ? va.loss : null, valAcc: useVal ? va.acc : null });
+    if (S.trainCancel) { early = true; break; }
+    if (useVal) {
+      if (va.loss < best.loss - 1e-5) { best = { loss: va.loss, snap: net.snapshot() }; bad = 0; }
+      else bad++;
+    }
+    onEpoch?.({ epoch, totalEpochs, tr, va, history, useVal });
+    await sleep(0);
+    if (useVal && bad >= 18 && epoch > 30) { early = true; break; }
+  }
+  if (useVal && best.snap) net.restore(best.snap);
+  const valEval = useVal ? evaluateNet(net, prep.X, prep.y, split.val) : evaluateNet(net, prep.X, prep.y, split.train);
+  const trainEval = evaluateNet(net, prep.X, prep.y, split.train);
+  const evalIdx = useVal ? split.val : split.train;
+  const matrix = confusionMatrix(net, prep.X, prep.y, evalIdx, prep.classes.length);
+  const seconds = (performance.now() - t0) / 1000;
+  const model = {
+    id: uid('m_'),
+    name: `${MODES[mode].title} · ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`,
+    mode, labels: prep.classes.map(c => c.name), createdAt: now(), updatedAt: now(),
+    net: { inputDim: prep.inputDim, hidden: [Math.max(4, p.hidden)], layers: net.layers.map(l => ({ in: l.in, out: l.out, w: l.w.slice(), b: l.b.slice() })) },
+    feature: { spec: prep.spec, dim: prep.inputDim },
+    params: { ...p },
+    stats: {
+      acc: trainEval.acc, valAcc: valEval.acc, loss: trainEval.loss, valLoss: valEval.loss,
+      samples: prep.total, classes: prep.classes.length,
+      trainSamples: split.train.length, valSamples: useVal ? split.val.length : 0, noVal: !useVal, history,
+      confusion: { labels: prep.classes.map(c => c.name), matrix },
+      ignored: prep.ignored, seconds, earlyStop: early, modes: mode, finished: now()
+    }
+  };
+  return {
+    model,
+    score: useVal ? valEval.acc : trainEval.acc,
+    lossScore: useVal ? valEval.loss : trainEval.loss,
+    useVal,
+    early
+  };
+}
+function setTrainButtonsBusy(busy, modeLabel = 'Training läuft') {
+  const btn = $('#train-btn'), autoBtn = $('#auto-train-btn'), cancelBtn = $('#train-cancel');
+  if (btn) {
+    btn.disabled = busy;
+    btn.innerHTML = busy && !S.autoTrainRunning ? `<span class="spin"></span>${modeLabel}` : `${icon('play')}Training starten`;
+  }
+  if (autoBtn) {
+    autoBtn.disabled = busy;
+    autoBtn.innerHTML = busy && S.autoTrainRunning ? `<span class="spin"></span>Auto-Train läuft` : `${icon('refresh')}Auto-Train`;
+  }
+  if (cancelBtn) cancelBtn.classList.toggle('hidden', !busy);
+}
 async function runTraining() {
   if (S.trainRunning) return;
   const mode = S.mode, ds = activeDataset();
@@ -2229,79 +2259,34 @@ async function runTraining() {
   const inspect = inspectTraining(mode, ds);
   if (inspect.classes.length < 2) return toast('Mindestens zwei Klassen mit Beispielen nötig.', 'error');
   if (inspect.total < 4) return toast('Mindestens vier verwendbare Beispiele nötig.', 'error');
-  S.trainRunning = true; S.trainCancel = false;
-  const btn = $('#train-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span>Training läuft`; }
-  const cancelBtn = $('#train-cancel');
-  if (cancelBtn) cancelBtn.classList.remove('hidden');
+  S.trainRunning = true; S.autoTrainRunning = false; S.trainCancel = false;
+  setTrainButtonsBusy(true);
   setTrainStatus('Training läuft', 'run');
   trainLog(`Start · ${inspect.total} Beispiele · ${inspect.classes.length} Klassen`);
-  const t0 = performance.now();
   try {
     const prep = await prepareTraining(mode, ds, msg => setTrainProgress(null, msg));
     if (prep.classes.length < 2) throw new Error('Zu wenige Klassen mit passenden Merkmalen.');
     if (prep.X.length < 4) throw new Error('Zu wenige verwendbare Beispiele.');
-    const net = new Net({ inputDim: prep.inputDim, hidden: [Math.max(4, p.hidden)], classes: prep.classes.length });
     trainLog(`Netz · ${prep.inputDim} Eingaben · ${p.hidden} versteckt · ${prep.classes.length} Ausgaben`);
-    const split = stratifiedSplit(prep.y, prep.classes.length, p.valSplit);
-    if (!split.train.length) throw new Error('Keine Trainingsdaten nach dem Split.');
-    const useVal = split.val.length >= Math.max(4, prep.classes.length * 2);
-    let best = { loss: Infinity, snap: null }, bad = 0, early = false;
-    const history = [];
-    const totalEpochs = Math.max(1, p.epochs);
-    for (let epoch = 1; epoch <= totalEpochs; epoch++) {
-      if (S.trainCancel) { early = true; trainLog('Vom Nutzer abgebrochen.'); break; }
-      shuffle(split.train);
-      for (let b = 0; b < split.train.length; b += p.batchSize) {
-        const batch = split.train.slice(b, b + p.batchSize);
-        net.zeroGrads();
-        for (const i of batch) { net._forward(prep.X[i]); net.backward(prep.y[i]); }
-        net.applyGrads(p.lr, p.l2, batch.length);
-        if (b % (p.batchSize * 20) === 0) await sleep(0);
-        if (S.trainCancel) break;
+    const res = await trainSingleRun({
+      mode, prep, p,
+      onEpoch: ({ epoch, totalEpochs, tr, va, history }) => {
+        setTrainProgress(epoch / totalEpochs * 100, `Epoche ${epoch}/${totalEpochs} · Loss ${tr.loss.toFixed(3)} · Val ${(va.acc * 100).toFixed(1)}%`);
+        if (epoch % Math.max(1, Math.round(totalEpochs / 14)) === 0 || epoch === 1 || epoch === totalEpochs) {
+          trainLog(`E${String(epoch).padStart(3)}  loss ${tr.loss.toFixed(3)}  val ${va.loss.toFixed(3)}  acc ${(tr.acc * 100).toFixed(1)}%`);
+        }
+        drawTrainChart(history);
       }
-      const trainIdx = split.train.length > 320 ? split.train.slice(0, 320) : split.train;
-      const tr = evaluateNet(net, prep.X, prep.y, trainIdx);
-      const va = split.val.length ? evaluateNet(net, prep.X, prep.y, split.val) : tr;
-      history.push({ epoch, loss: tr.loss, acc: tr.acc, valLoss: useVal ? va.loss : null, valAcc: useVal ? va.acc : null });
-      if (S.trainCancel) { early = true; trainLog('Vom Nutzer abgebrochen.'); break; }
-      if (useVal) {
-        if (va.loss < best.loss - 1e-5) { best = { loss: va.loss, snap: net.snapshot() }; bad = 0; }
-        else bad++;
-      }
-      setTrainProgress(epoch / totalEpochs * 100, `Epoche ${epoch}/${totalEpochs} · Loss ${tr.loss.toFixed(3)} · Val ${(va.acc * 100).toFixed(1)}%`);
-      if (epoch % Math.max(1, Math.round(totalEpochs / 14)) === 0 || epoch === 1 || epoch === totalEpochs) {
-        trainLog(`E${String(epoch).padStart(3)}  loss ${tr.loss.toFixed(3)}  val ${va.loss.toFixed(3)}  acc ${(tr.acc * 100).toFixed(1)}%`);
-      }
-      drawTrainChart(history);
-      await sleep(0);
-      if (useVal && bad >= 18 && epoch > 30) { early = true; trainLog('Early Stop · Validierung stagniert.'); break; }
-    }
-    if (useVal && best.snap) net.restore(best.snap);
-    const valEval = useVal ? evaluateNet(net, prep.X, prep.y, split.val) : evaluateNet(net, prep.X, prep.y, split.train);
-    const trainEval = evaluateNet(net, prep.X, prep.y, split.train);
-    const evalIdx = useVal ? split.val : split.train;
-    const matrix = confusionMatrix(net, prep.X, prep.y, evalIdx, prep.classes.length);
-    const seconds = (performance.now() - t0) / 1000;
-    const model = {
-      id: uid('m_'), name: `${MODES[mode].title} · ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`,
-      mode, labels: prep.classes.map(c => c.name), createdAt: now(), updatedAt: now(),
-      net: { inputDim: prep.inputDim, hidden: [Math.max(4, p.hidden)], layers: net.layers.map(l => ({ in: l.in, out: l.out, w: l.w.slice(), b: l.b.slice() })) },
-      feature: { spec: prep.spec, dim: prep.inputDim },
-      params: { ...p },
-      stats: {
-        acc: trainEval.acc, valAcc: valEval.acc, samples: prep.total, classes: prep.classes.length,
-        trainSamples: split.train.length, valSamples: useVal ? split.val.length : 0, noVal: !useVal, history,
-        confusion: { labels: prep.classes.map(c => c.name), matrix },
-        ignored: prep.ignored, seconds, earlyStop: early, modes: mode, finished: now()
-      }
-    };
+    });
+    if (S.trainCancel) trainLog('Vom Nutzer abgebrochen.');
+    else if (res.early) trainLog('Early Stop · Validierung stagniert.');
+    const model = res.model;
     S.lastTrain = { ...model.stats, mode };
     S.currentModel = model;
     S.trainRunning = false;
-    setTrainProgress(100, early ? 'Training beendet' : 'Training abgeschlossen');
-    setTrainStatus(early ? 'Beendet' : 'Fertig', early ? 'warn' : 'live');
-    trainLog(`Fertig · Genauigkeit ${(trainEval.acc * 100).toFixed(1)}% · Validierung ${(valEval.acc * 100).toFixed(1)}% · ${seconds.toFixed(1)} s`);
+    setTrainProgress(100, res.early ? 'Training beendet' : 'Training abgeschlossen');
+    setTrainStatus(res.early ? 'Beendet' : 'Fertig', res.early ? 'warn' : 'live');
+    trainLog(`Fertig · Genauigkeit ${(model.stats.acc * 100).toFixed(1)}% · Validierung ${(model.stats.valAcc * 100).toFixed(1)}% · ${model.stats.seconds.toFixed(1)} s`);
     await saveModelRecord(model);
     toast('Training abgeschlossen · Modell gespeichert', 'success');
     renderStudio();
@@ -2313,10 +2298,101 @@ async function runTraining() {
     toast('Training fehlgeschlagen: ' + e.message, 'error', 5200);
   } finally {
     S.trainRunning = false;
+    S.autoTrainRunning = false;
     S.trainCancel = false;
-    const b = $('#train-btn');
-    if (b) { b.disabled = false; b.innerHTML = `${icon('play')}Training starten`; }
-    const cb = $('#train-cancel'); if (cb) cb.classList.add('hidden');
+    setTrainButtonsBusy(false);
+  }
+}
+function varyParams(base) {
+  const hiddenOffsets = [-16, -8, 0, 8, 16, 32];
+  const hidden = clamp(base.hidden + hiddenOffsets[Math.floor(Math.random() * hiddenOffsets.length)], 4, 256);
+  const lr = clamp(+(base.lr * (0.65 + Math.random() * 0.8)).toFixed(5), 0.00001, 0.2);
+  const l2 = clamp(+(base.l2 * (0.25 + Math.random() * 2.5)).toFixed(5), 0, 0.05);
+  const batchSize = clamp(Math.round(base.batchSize * (0.75 + Math.random() * 0.5)), 2, 128);
+  return { ...base, hidden, lr, l2, batchSize };
+}
+async function runAutoTrain() {
+  if (S.trainRunning) return;
+  const mode = S.mode, ds = activeDataset();
+  if (!ds) return;
+  const baseP = readParams(mode);
+  const runs = clamp(parseInt($('#auto-train-runs')?.value || S.autoTrainRuns, 10) || 15, 2, 200);
+  const vary = $('#auto-train-vary')?.checked ?? S.autoTrainVary;
+  S.autoTrainRuns = runs;
+  S.autoTrainVary = vary;
+  const inspect = inspectTraining(mode, ds);
+  if (inspect.classes.length < 2) return toast('Mindestens zwei Klassen mit Beispielen nötig.', 'error');
+  if (inspect.total < 4) return toast('Mindestens vier verwendbare Beispiele nötig.', 'error');
+  S.trainRunning = true; S.autoTrainRunning = true; S.trainCancel = false;
+  setTrainButtonsBusy(true);
+  setTrainStatus(`Auto-Train 1/${runs}`, 'run');
+  const logEl = $('#train-log');
+  if (logEl) logEl.textContent = '';
+  trainLog(`Auto-Train gestartet · ${runs} Läufe · ${vary ? 'Hyperparameter-Variation aktiv' : 'feste Parameter'}`);
+  const t0 = performance.now();
+  let best = null;
+  let completed = 0;
+  try {
+    const prep = await prepareTraining(mode, ds, msg => setTrainProgress(null, msg));
+    if (prep.classes.length < 2) throw new Error('Zu wenige Klassen mit passenden Merkmalen.');
+    if (prep.X.length < 4) throw new Error('Zu wenige verwendbare Beispiele.');
+    for (let trial = 1; trial <= runs; trial++) {
+      if (S.trainCancel) break;
+      const tp = (vary && trial > 1) ? varyParams(baseP) : { ...baseP };
+      setTrainStatus(`Auto-Train ${trial}/${runs}`, 'run');
+      const res = await trainSingleRun({
+        mode, prep, p: tp,
+        onEpoch: ({ epoch, totalEpochs }) => {
+          if (epoch % 3 === 0 || epoch === totalEpochs) {
+            const overall = ((trial - 1 + epoch / totalEpochs) / runs) * 100;
+            const bestTxt = best ? ` · Best: ${(best.score * 100).toFixed(1)}%` : '';
+            setTrainProgress(overall, `Lauf ${trial}/${runs} · Epoche ${epoch}/${totalEpochs}${bestTxt}`);
+          }
+        }
+      });
+      if (S.trainCancel && trial > 1 && completed > 0) break;
+      completed++;
+      const isBetter = !best || res.score > best.score + 1e-6 || (Math.abs(res.score - best.score) <= 1e-6 && res.lossScore < best.lossScore);
+      if (isBetter) {
+        best = { ...res, trial };
+        drawTrainChart(best.model.stats.history);
+        trainLog(`Lauf ${String(trial).padStart(2)}/${runs}  ${(res.score * 100).toFixed(1)}%  Loss ${res.lossScore.toFixed(3)}  ★ Bestwert (lr=${tp.lr}, h=${tp.hidden})`);
+      } else {
+        trainLog(`Lauf ${String(trial).padStart(2)}/${runs}  ${(res.score * 100).toFixed(1)}%  Loss ${res.lossScore.toFixed(3)}`);
+      }
+      await sleep(0);
+    }
+    if (!best) {
+      setTrainStatus('Abgebrochen', 'warn');
+      trainLog('Auto-Train abgebrochen (kein abgeschlossener Lauf).');
+      toast('Auto-Train abgebrochen', 'error');
+      return;
+    }
+    const totalSec = (performance.now() - t0) / 1000;
+    const model = best.model;
+    model.name = `${MODES[mode].title} · Auto-Best (${(best.score * 100).toFixed(1)}%)`;
+    model.stats.seconds = totalSec;
+    model.stats.autoTrain = { runs: completed, bestRun: best.trial };
+    S.lastTrain = { ...model.stats, mode };
+    S.currentModel = model;
+    S.trainRunning = false; S.autoTrainRunning = false;
+    setTrainProgress(100, `Fertig · Bestwert ${(best.score * 100).toFixed(1)}% (Lauf ${best.trial}/${completed})`);
+    setTrainStatus(S.trainCancel ? 'Beendet' : 'Fertig', S.trainCancel ? 'warn' : 'live');
+    trainLog(`Ergebnis: Lauf ${best.trial}/${completed} behalten · ${(best.score * 100).toFixed(1)}% · ${totalSec.toFixed(1)} s`);
+    await saveModelRecord(model);
+    toast(`Auto-Train fertig · Bestes Modell (${(best.score * 100).toFixed(1)}%) gespeichert`, 'success', 4200);
+    renderStudio();
+    setTimeout(afterStudioRender, 30);
+  } catch (e) {
+    console.error(e);
+    setTrainStatus('Fehler', 'warn');
+    trainLog('Fehler: ' + e.message);
+    toast('Auto-Train fehlgeschlagen: ' + e.message, 'error', 5200);
+  } finally {
+    S.trainRunning = false;
+    S.autoTrainRunning = false;
+    S.trainCancel = false;
+    setTrainButtonsBusy(false);
   }
 }
 function readParams(mode) {
@@ -2581,22 +2657,24 @@ const Cam = {
   }
 };
 function updateCameraUI() {
-  const empty = $('#camera-empty');
-  const badge = $('#camera-badge');
-  const badgeText = $('#camera-badge-text');
-  if (!empty) return;
-  empty.classList.toggle('hidden', !!Cam.active);
-  if (Cam.active) {
-    if (badge) badge.className = 'camera-badge';
-    if (badgeText) badgeText.textContent = S.mode === 'pose' ? (S.pose?.enabled ? 'Keypoints · live' : 'Bildmerkmale · live') : 'Kamera bereit';
-  } else {
-    if (badge) badge.className = 'camera-badge bad';
-    if (badgeText) badgeText.textContent = Cam.error || 'Kamera aus';
-    const err = $('#camera-error');
-    if (err) err.textContent = Cam.error || 'Kamera starten, um Beispiele aufzunehmen.';
+  const pairs = [
+    { empty: $('#camera-empty'), badge: $('#camera-badge'), badgeText: $('#camera-badge-text'), emptyText: $('#camera-empty-text') },
+    { empty: $('#test-camera-empty'), badge: $('#test-camera-badge'), badgeText: $('#test-camera-badge-text'), emptyText: $('#test-camera-empty-text') }
+  ];
+  for (const { empty, badge, badgeText, emptyText } of pairs) {
+    if (!empty) continue;
+    empty.classList.toggle('hidden', !!Cam.active);
+    if (Cam.active) {
+      if (badge) badge.className = 'camera-badge';
+      if (badgeText) badgeText.textContent = S.mode === 'pose' ? (S.pose?.enabled ? 'Keypoints · live' : 'Bildmerkmale · live') : 'Kamera bereit';
+    } else {
+      if (badge) badge.className = 'camera-badge bad';
+      if (badgeText) badgeText.textContent = Cam.error || 'Kamera aus';
+    }
+    if (emptyText && Cam.error) emptyText.textContent = Cam.error;
   }
-  const emptyText = $('#camera-empty-text');
-  if (emptyText && Cam.error) emptyText.textContent = Cam.error;
+  const err = $('#camera-error');
+  if (!Cam.active && err) err.textContent = Cam.error || 'Kamera starten, um Beispiele aufzunehmen.';
 }
 
 /* ============================================================
@@ -2659,6 +2737,7 @@ const AudioEngine = {
     this.ctx = null; this.stream = null; this.source = null; this.proc = null; this.sink = null;
     this.chunks = []; this.recChunks = []; this.total = 0; this.running = false; this.level = 0;
     updateAudioMeters(0);
+    if (typeof updateMicPill === 'function') updateMicPill();
   },
   getLast(seconds) {
     const want = Math.round(this.rate * seconds);
@@ -3107,7 +3186,7 @@ function stopTTSRecording() {
   refreshClassList();
   updateCaptureCounts();
   const txtEl = $('#tts-text'); if (txtEl) txtEl.value = '';
-  const timer = $('#tts-timer'); if (timer) timer.textContent = out.length / AUDIO_SR + ' s';
+  const timer = $('#tts-timer'); if (timer) timer.textContent = (out.length / AUDIO_SR).toFixed(1) + ' s';
   const playBtn = $('#tts-play-last-btn'); if (playBtn) playBtn.disabled = false;
   setRecStatus('Gespeichert', `${cls.samples.length}${cls.samples.length === 1 ? ' Probe' : ' Proben'} · „${cls.name}“`);
   toast(`Sprachprobe zu „${cls.name}“ gespeichert`, 'success');
@@ -3168,6 +3247,7 @@ function activeModel() {
 }
 function expectedSpecForMode(mode) {
   if (mode === 'text') return 'text-v1';
+  if (mode === 'textgen') return null;
   if (mode === 'stt') return 'mfcc-v1';
   if (mode === 'image') return 'img-v1';
   if (mode === 'pose') return (S.pose?.enabled && PoseEngine.ready) ? 'pose-kp-v1' : 'pose-app-v1';
@@ -3227,9 +3307,15 @@ function specLabel(spec) {
 function studioTabs() {
   const t = [
     { id: 'data', label: S.mode === 'tts' ? 'Proben' : 'Daten' },
-    { id: 'training', label: S.mode === 'tts' ? 'Stimme' : 'Training' },
-    { id: 'test', label: S.mode === 'tts' ? 'Ausgabe' : 'Test' }
+    { id: 'training', label: S.mode === 'tts' ? 'Stimme' : 'Training' }
   ];
+  if (S.mode === 'text') {
+    t.push({ id: 'classify', label: 'Klassifikation' });
+  } else if (S.mode === 'textgen') {
+    t.push({ id: 'chat', label: 'Chat' });
+  } else {
+    t.push({ id: 'test', label: S.mode === 'tts' ? 'Ausgabe' : 'Test' });
+  }
   const ds = activeDataset();
   return `<div class="studio-tabs" role="tablist">${t.map(x => `<button role="tab" aria-selected="${S.tab === x.id}" class="${S.tab === x.id ? 'active' : ''}" data-action="tab" data-tab="${x.id}">${x.label}${x.id === 'data' && ds ? `<span class="tab-badge">${dsCounts(ds).samples}</span>` : ''}</button>`).join('')}</div>`;
 }
@@ -3252,7 +3338,7 @@ function renderStudio() {
       </div>
     </div>
     ${studioTabs()}
-    <div id="studio-body">${S.tab === 'data' ? renderDataTab() : S.tab === 'training' ? renderTrainingTab() : renderTestTab()}</div>`;
+    <div id="studio-body">${S.tab === 'data' ? renderDataTab() : S.tab === 'training' ? renderTrainingTab() : S.tab === 'classify' ? renderTextClassify() : S.tab === 'chat' ? renderTextChat() : renderTestTab()}</div>`;
   refreshStorage();
 }
 function tabBadgeForModel() {
@@ -3266,7 +3352,7 @@ function tabBadgeForModel() {
 function datasetSearchMatches(cls, q) {
   if (!q) return true;
   if (cls.name.toLowerCase().includes(q)) return true;
-  if (S.mode === 'text' || S.mode === 'tts') return cls.samples.some(s => sampleText(s).toLowerCase().includes(q));
+  if (S.mode === 'text' || S.mode === 'textgen' || S.mode === 'tts') return cls.samples.some(s => sampleText(s).toLowerCase().includes(q));
   return false;
 }
 function renderDataTab() {
@@ -3285,16 +3371,17 @@ function renderDataTab() {
         <button class="btn soft sm" data-action="add-class">${icon('plus')}${S.mode === 'tts' ? 'Stimme' : 'Klasse'}</button>
       </div>
       <div class="dataset-toolbar">
-        <div class="search">${icon('search')}<input class="input" id="data-search" placeholder="${S.mode === 'text' || S.mode === 'tts' ? 'Klassen und Texte durchsuchen' : 'Klassen durchsuchen'}" value="${esc(S.search)}" autocomplete="off">${S.search ? `<button class="search-clear" data-action="clear-data-search" aria-label="Suche leeren">${icon('x')}</button>` : ''}</div>
+        <div class="search">${icon('search')}<input class="input" id="data-search" placeholder="${S.mode === 'text' || S.mode === 'textgen' || S.mode === 'tts' ? 'Klassen und Texte durchsuchen' : 'Klassen durchsuchen'}" value="${esc(S.search)}" autocomplete="off">${S.search ? `<button class="search-clear" data-action="clear-data-search" aria-label="Suche leeren">${icon('x')}</button>` : ''}</div>
         <span class="muted" id="dataset-meta-2">${fnum(c.samples)} Beispiele</span>
       </div>
       ${mixed ? `<div class="warn-box">${icon('alert')}<span>${mixed} Beispiele nutzen ein anderes Merkmalsformat als der aktuelle Pose-Modus. Sie werden beim Training ignoriert. Nimm sie im gewünschten Modus neu auf.</span></div>` : ''}
       <div class="class-list" id="class-list">${renderClassList(list, q)}</div>
       <div class="dataset-foot">
-        <span class="muted">${c.samples ? `${fnum(c.samples)} Beispiele lokal gespeichert` : 'Noch keine Beispiele'}</span>
+        <span class="muted">${c.samples ? `${fnum(c.samples)} Beispiele lokal` : 'Noch keine Beispiele'}</span>
         <button class="btn soft sm" data-action="export-dataset">${icon('download')}Export</button>
         <button class="btn soft sm" data-action="import-dataset">${icon('upload')}Import</button>
         <button class="btn ghost sm" data-action="clear-all-samples" ${c.samples ? '' : 'disabled'}>${icon('trash')}Leeren</button>
+        ${c.samples ? `<button class="btn primary sm" data-action="tab" data-tab="training">Zum Training ${icon('arrow-right')}</button>` : ''}
       </div>
     </div>
     <aside class="capture-col">
@@ -3349,7 +3436,7 @@ function renderSamples(c) {
   const shown = c.samples.slice(0, cap);
   const more = c.samples.length - shown.length;
   if (!c.samples.length) {
-    return `<div class="empty samples-empty" style="padding:18px 8px">${icon(mode === 'image' || mode === 'pose' ? 'camera' : mode === 'text' ? 'text' : 'mic')}<span>${mode === 'text' ? 'Noch keine Texte in dieser Klasse.' : mode === 'tts' ? 'Noch keine Sprachproben.' : 'Noch keine Beispiele.'}</span></div>`;
+    return `<div class="empty samples-empty" style="padding:18px 8px">${icon(mode === 'image' || mode === 'pose' ? 'camera' : mode === 'text' || mode === 'textgen' ? 'text' : 'mic')}<span>${mode === 'text' || mode === 'textgen' ? 'Noch keine Texte in dieser Klasse.' : mode === 'tts' ? 'Noch keine Sprachproben.' : 'Noch keine Beispiele.'}</span></div>`;
   }
   let inner = '';
   if (mode === 'image' || mode === 'pose') {
@@ -3357,7 +3444,7 @@ function renderSamples(c) {
       ${s.thumb ? `<img src="${s.thumb}" alt="" loading="lazy">` : `<div style="display:grid;place-items:center;height:100%;color:var(--ink-3)">${icon('image')}</div>`}
       <button class="thumb-del" data-action="remove-sample" data-class="${c.id}" data-sample="${s.id}" aria-label="Beispiel entfernen">${icon('x')}</button>
     </div>`).join('')}</div></div>`;
-  } else if (mode === 'text') {
+  } else if (mode === 'text' || mode === 'textgen') {
     inner = `<div class="chips">${shown.map(s => `<span class="chip"><span title="${esc(sampleText(s))}">${esc(sampleText(s))}</span><button data-action="remove-sample" data-class="${c.id}" data-sample="${s.id}" aria-label="Text entfernen">${icon('x')}</button></span>`).join('')}</div>`;
   } else if (mode === 'stt' || mode === 'tts') {
     inner = `<div class="samples-scroll audio-rows">${shown.map((s, i) => {
@@ -3394,9 +3481,9 @@ function renderCapturePanel() {
       <p class="hint-text"><b>So geht es:</b> Klasse wählen, Knopf gedrückt halten und das Objekt langsam bewegen. Loslassen beendet die Aufnahme.</p>
     </div>`;
   }
-  if (S.mode === 'text') {
+  if (S.mode === 'text' || S.mode === 'textgen') {
     return `<div class="capture-body">
-      <div class="capture-head"><h3>Beispiele</h3><span class="pill good">${icon('check')}Offline</span></div>
+      <div class="capture-head"><h3>Texte</h3><span class="pill good">${icon('check')}Offline</span></div>
       <div class="class-select-row"><span class="class-select-dot" style="--c:${color}"></span><select class="select" id="capture-class" aria-label="Zielklasse">${clsOptions}</select></div>
       <div class="field"><label>Neue Texte · ein Beispiel pro Zeile</label><textarea id="text-new" rows="5" placeholder="Zum Beispiel:&#10;Das Produkt ist großartig.&#10;Ich bin sehr zufrieden."></textarea></div>
       <button class="btn primary" data-action="add-text" ${cls ? '' : 'disabled'}>${icon('plus')}Beispiele hinzufügen</button>
@@ -3491,7 +3578,7 @@ async function addClass() {
   const isVoice = S.mode === 'tts';
   const name = await promptDialog({
     title: isVoice ? 'Neue Stimme' : 'Neue Klasse',
-    label: 'Name', value: isVoice ? 'Stimme ' + (ds.classes.length + 1) : (S.mode === 'stt' ? 'Wort ' + (ds.classes.length + 1) : 'Klasse ' + (ds.classes.length + 1)),
+    label: 'Name', value: isVoice ? 'Stimme ' + (ds.classes.length + 1) : (S.mode === 'stt' ? 'Wort ' + (ds.classes.length + 1) : (S.mode === 'text' || S.mode === 'textgen' ? 'Text ' + (ds.classes.length + 1) : 'Klasse ' + (ds.classes.length + 1))),
     confirm: 'Anlegen'
   });
   if (!name) return;
@@ -3583,6 +3670,7 @@ async function exportDataset() {
       samples: c.samples.map(s => {
         const o = { t: s.t, text: s.text, dur: s.dur, sr: s.sr, fs: s.fs, thumb: s.thumb };
         if (s.pcm) o.pcm = b64FromArray(s.pcm);
+        if (s.f) o.f = b64FromArray(s.f);
         return o;
       })
     }))
@@ -3607,6 +3695,7 @@ async function importDatasetFile(file) {
       samples: (c.samples || []).map(s => {
         const o = { id: uid('s_'), t: s.t, text: s.text, dur: s.dur, sr: s.sr || AUDIO_SR, fs: s.fs, thumb: s.thumb };
         if (s.pcm) o.pcm = int16FromB64(s.pcm);
+        if (s.f) o.f = Array.isArray(s.f) ? new Float32Array(s.f) : float32FromB64(s.f);
         return o;
       })
     }));
@@ -3670,6 +3759,7 @@ async function handleTextUpload(file) {
    ============================================================ */
 function renderTrainingTab() {
   if (S.mode === 'tts') return renderVoiceTrainingTab();
+  if (S.mode === 'textgen') return renderTextGenTrainingTab();
   const ds = activeDataset();
   const p = getParams(S.mode);
   const insp = inspectTraining(S.mode, ds);
@@ -3697,6 +3787,10 @@ function renderTrainingTab() {
           ${insp.ignored ? `<div class="warn-box" style="margin:11px 0 0">${icon('alert')}<span>${insp.ignored} Beispiele haben ein anderes Merkmalsformat oder keine gültigen Daten und werden ignoriert.</span></div>` : ''}
           ${!ready ? `<div class="warn-box" style="margin:11px 0 0">${icon('alert')}<span>Es werden mindestens zwei Klassen mit zusammen vier verwendbaren Beispielen benötigt.</span></div>` : ''}
           <div class="panel-divider"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <span class="field-label">Hyperparameter</span>
+            <button class="link-btn" data-action="auto-params" title="Parameter passend zur Datensatzgröße setzen">Auto-Werte</button>
+          </div>
           <div class="params">
             <div class="field"><label for="p-epochs">Epochen</label><input class="input" id="p-epochs" data-param="epochs" type="number" min="1" max="500" value="${p.epochs}"></div>
             <div class="field"><label for="p-lr">Lernrate</label><input class="input" id="p-lr" data-param="lr" type="number" step="0.0005" min="0.00001" max="0.2" value="${p.lr}"></div>
@@ -3705,7 +3799,6 @@ function renderTrainingTab() {
             <div class="field"><label for="p-l2">L2-Regularisierung</label><input class="input" id="p-l2" data-param="l2" type="number" step="0.0001" min="0" max="0.05" value="${p.l2}"></div>
             <div class="field"><label for="p-val">Validierung</label><input class="input" id="p-val" data-param="valSplit" type="number" step="0.05" min="0" max="0.5" value="${p.valSplit}"></div>
           </div>
-          <p class="note" style="margin-top:10px">Kleine Datensätze: 80–150 Epochen, Lernrate 0,006–0,01. Bei Überanpassung Validierung erhöhen oder Epochen senken.</p>
         </div>
       </div>
       <div class="panel">
@@ -3713,10 +3806,21 @@ function renderTrainingTab() {
         <div class="panel-body">
           ${modelStatusCard(activeModel(), true)}
           <div class="train-footer">
-            <button class="btn primary lg ${ready && !S.trainRunning ? 'pulse' : ''}" id="train-btn" data-action="train" ${!ready || S.trainRunning ? 'disabled' : ''}>${S.trainRunning ? '<span class="spin"></span>Training läuft' : icon('play') + 'Training starten'}</button>
-            <button class="btn danger hidden" id="train-cancel" data-action="cancel-train">${icon('stop')}Abbrechen</button>
+            <button class="btn primary lg ${ready && !S.trainRunning ? 'pulse' : ''}" id="train-btn" data-action="train" ${!ready || S.trainRunning ? 'disabled' : ''}>${S.trainRunning && !S.autoTrainRunning ? '<span class="spin"></span>Training läuft' : icon('play') + 'Training starten'}</button>
+            <button class="btn danger ${S.trainRunning ? '' : 'hidden'}" id="train-cancel" data-action="cancel-train">${icon('stop')}Abbrechen</button>
+            ${activeModel() && !S.trainRunning ? `<button class="btn soft lg" data-action="goto-test">${icon('arrow-right')}Testen</button>` : ''}
           </div>
-          <p class="note" style="margin-top:9px">Das Training läuft lokal im Browser. Die Daten werden nicht hochgeladen. Nach dem Training wird das Modell automatisch in der Bibliothek gespeichert.</p>
+          <div class="auto-train-box">
+            <div class="auto-train-head">
+              <b>Auto-Train Modus</b>
+              <span class="muted">Trainiert oft &amp; behält das beste Modell</span>
+            </div>
+            <div class="auto-train-controls">
+              <label class="auto-train-runs">Läufe <input class="input" id="auto-train-runs" type="number" min="2" max="200" value="${S.autoTrainRuns}"></label>
+              <label class="check-row"><input type="checkbox" id="auto-train-vary" ${S.autoTrainVary ? 'checked' : ''}>Parameter variieren</label>
+              <button class="btn soft sm" id="auto-train-btn" data-action="auto-train" ${!ready || S.trainRunning ? 'disabled' : ''} style="margin-left:auto">${S.autoTrainRunning ? '<span class="spin"></span>Auto-Train läuft' : icon('refresh') + 'Auto-Train'}</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -3842,7 +3946,8 @@ function renderVoiceTrainingTab() {
    ============================================================ */
 function renderTestTab() {
   if (S.mode === 'tts') return renderTTSTest();
-  if (S.mode === 'text') return renderTextTest();
+  if (S.mode === 'text') return renderTextClassify();
+  if (S.mode === 'textgen') return renderTextChat();
   if (S.mode === 'stt') return renderSTTTest();
   return renderVisionTest();
 }
@@ -3927,9 +4032,8 @@ function renderSTTTest() {
     </div>
   </div>`;
 }
-function renderTextTest() {
+function renderTextClassify() {
   const cur = activeModel();
-  const corpus = textCorpus();
   return `<div class="text-test-grid">
     <div class="panel">
       <div class="panel-head"><h3 class="panel-title">Klassifikation</h3><span class="spacer"></span>${cur ? `<span class="pill good">${icon('check')}Modell</span>` : `<span class="pill">kein Modell</span>`}</div>
@@ -3942,6 +4046,43 @@ function renderTextTest() {
         ${modelStatusCard(cur)}` : `<div class="empty" style="padding:30px 8px">${icon('text')}<b>Klassifikator trainieren</b><span>Mindestens zwei Textklassen mit Beispielen anlegen und trainieren.</span><button class="btn soft sm" data-action="tab" data-tab="training">Zum Training</button></div>`}
       </div>
     </div>
+  </div>`;
+}
+function renderTextGenTrainingTab() {
+  const corpus = textCorpus();
+  const ready = corpus.words >= 8;
+  return `<div class="train-grid">
+    <div class="train-col">
+      <div class="panel">
+        <div class="panel-head"><h3 class="panel-title">Korpus</h3><span class="spacer"></span><span class="pill ${ready ? 'good' : 'warn'}">${icon(ready ? 'check' : 'alert')}${ready ? 'bereit' : 'zu wenig Text'}</span></div>
+        <div class="panel-body">
+          <div class="train-summary">
+            <span class="pill">${fnum(corpus.samples)} Texte</span>
+            <span class="pill">${fnum(corpus.words)} Wörter</span>
+          </div>
+          ${!ready ? `<div class="warn-box" style="margin:11px 0 0">${icon('alert')}<span>Mindestens 8 Wörter in den Texten nötig. Füge mehr und längere Texte hinzu.</span></div>` : ''}
+          <div class="panel-divider"></div>
+          <p class="note">Der Generator lernt Wortfolgen aus deinen Texten. Je mehr und je länger die Texte, desto besser die Ergebnisse. Es gibt keinen separaten Trainingsschritt – der Korpus wird beim Chatten automatisch aufgebaut.</p>
+        </div>
+      </div>
+    </div>
+    <div class="train-col">
+      <div class="panel">
+        <div class="panel-head"><h3 class="panel-title">Modell</h3><span class="spacer"></span><span class="status-chip" id="train-status"><i></i>${ready ? 'Bereit' : 'Unvollständig'}</span></div>
+        <div class="panel-body">
+          <div class="empty" style="padding:24px 8px">${icon('text')}<b>n-Gramm-Modell</b><span>Wird automatisch aus deinem Korpus aufgebaut. Kein Training nötig.</span></div>
+          <div class="train-footer">
+            <button class="btn primary lg ${ready ? 'pulse' : ''}" data-action="tab" data-tab="chat" ${ready ? '' : 'disabled'}>${icon('play')}Zum Chat</button>
+          </div>
+          <p class="note" style="margin-top:9px">Der Generator ist kein Sprachmodell mit Weltwissen – er setzt deinen Stil und deine Wendungen fort.</p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function renderTextChat() {
+  const corpus = textCorpus();
+  return `<div class="text-test-grid">
     <div class="panel">
       <div class="panel-head"><h3 class="panel-title">Generator</h3><span class="spacer"></span><span class="pill">${corpus.words} Wörter</span></div>
       <div class="panel-body">
@@ -4762,14 +4903,16 @@ async function openModel(id) {
     const cls = ds.classes.find(c => c.name === m.labels[0]);
     if (cls) S.selectedClass[m.mode] = cls.id;
   }
+  S.lastTrain = null;
   S.currentModel = m;
-  S.tab = 'test';
+  S.tab = (m.mode === 'text') ? 'classify' : (m.mode === 'textgen') ? 'chat' : 'test';
   renderStudio();
   setTimeout(afterStudioRender, 30);
 }
 function selectModelById(id) {
   if (!id) S.currentModel = null;
   else S.currentModel = S.models.find(m => m.id === id) || null;
+  S.lastTrain = null;
   S.ttsOut = null;
   S.uploadResult = null;
   renderStudio();
@@ -4810,7 +4953,7 @@ function viewSample(classId, sampleId) {
   const audio = sample.pcm?.length ? `<div class="inline-actions" style="margin-top:9px"><button class="btn soft sm" data-action="play-sample" data-class="${classId}" data-sample="${sampleId}">${icon('play')}Abspielen</button><span class="muted">${(sample.pcm.length / (sample.sr || AUDIO_SR)).toFixed(2)} s</span></div>` : '';
   const body = sample.thumb
     ? `<img src="${sample.thumb}" alt="Beispiel" style="width:100%;max-height:340px;object-fit:contain;border-radius:9px;background:var(--surface-2)">${audio}`
-    : `<div class="result-box"><span class="rb-label">${S.mode === 'text' || S.mode === 'tts' ? 'Text' : 'Beispiel'}</span><span class="rb-value" style="font-size:13px;font-weight:450;line-height:1.55">${esc(sampleText(sample) || 'Merkmalsvektor ohne Vorschau')}</span></div>${audio}`;
+    : `<div class="result-box"><span class="rb-label">${S.mode === 'text' || S.mode === 'textgen' || S.mode === 'tts' ? 'Text' : 'Beispiel'}</span><span class="rb-value" style="font-size:13px;font-weight:450;line-height:1.55">${esc(sampleText(sample) || 'Merkmalsvektor ohne Vorschau')}</span></div>${audio}`;
   modal({
     title: cls.name, wide: true, body,
     actions: [
@@ -4899,6 +5042,7 @@ const onClassify = debounce(() => updateTextPrediction(), 100);
 function handleAction(action, el, e) {
   switch (action) {
     case 'nav': setView(el.dataset.view || 'home'); break;
+    case 'scroll-modes': document.querySelector('#mode-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); break;
     case 'open-mode': openMode(el.dataset.mode); break;
     case 'open-model': openModel(el.dataset.id); break;
     case 'test-model': openModel(el.dataset.id); break;
@@ -4945,9 +5089,18 @@ function handleAction(action, el, e) {
     case 'auto-mode': toggleAuto(); break;
     case 'start-mic': startMicUI(); break;
     case 'train': runTraining(); break;
+    case 'auto-train': runAutoTrain(); break;
+    case 'auto-params': {
+      const ds = activeDataset();
+      if (!S.mode || !ds) break;
+      S.params[S.mode] = autoParams(S.mode, ds);
+      renderStudio(); setTimeout(afterStudioRender, 30);
+      toast('Parameter automatisch angepasst', 'success', 2000);
+      break;
+    }
     case 'cancel-train': S.trainCancel = true; toast('Training wird abgebrochen …'); break;
     case 'build-voice': buildVoice(); break;
-    case 'goto-test': if (!activeModel()) toast('Kein Modell geladen.', 'error'); else setTab('test'); break;
+    case 'goto-test': if (!activeModel()) toast('Kein Modell geladen.', 'error'); else setTab(S.mode === 'text' ? 'classify' : S.mode === 'textgen' ? 'chat' : 'test'); break;
     case 'goto-tts-test': setTab('test'); break;
     case 'tts-record': recordTTSSample(); break;
     case 'tts-play-last': playLastTTS(); break;
@@ -4996,11 +5149,20 @@ function onGlobalInput(e) {
   } else if (t.id === 'chat-input') {
     t.style.height = 'auto';
     t.style.height = Math.min(110, t.scrollHeight) + 'px';
+  } else if (t.id === 'auto-train-runs') {
+    const v = parseInt(t.value, 10);
+    if (Number.isFinite(v)) S.autoTrainRuns = clamp(v, 2, 200);
+  } else if (t.dataset?.param && S.mode) {
+    const p = getParams(S.mode);
+    const v = parseFloat(t.value);
+    if (Number.isFinite(v)) p[t.dataset.param] = v;
   }
 }
 function onGlobalChange(e) {
   const t = e.target;
-  if (t.id === 'model-picker') selectModelById(t.value);
+  if (t.id === 'auto-train-vary') {
+    S.autoTrainVary = !!t.checked;
+  } else if (t.id === 'model-picker') selectModelById(t.value);
   else if (t.id === 'capture-class') {
     if (!S.mode) return;
     S.selectedClass[S.mode] = t.value || null;
@@ -5057,12 +5219,25 @@ function onGlobalKeydown(e) {
     e.preventDefault();
     updateTextPrediction();
   }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && e.target.id === 'text-new') {
+    e.preventDefault();
+    addTextSamples();
+  }
+  if (e.code === 'Space' && !e.repeat && S.view === 'studio' && S.tab === 'data' && (S.mode === 'image' || S.mode === 'pose')) {
+    if (!e.target.closest('input,textarea,select,button') && !$('#modal-root')?.innerHTML) {
+      e.preventDefault();
+      startHold();
+    }
+  }
 }
 function bindGlobalEvents() {
   document.addEventListener('click', onGlobalClick);
   document.addEventListener('input', onGlobalInput);
   document.addEventListener('change', onGlobalChange);
   document.addEventListener('keydown', onGlobalKeydown);
+  document.addEventListener('keyup', e => {
+    if (e.code === 'Space' && S.hold) stopHold();
+  });
   document.addEventListener('pointerdown', e => {
     const hold = e.target.closest('[data-hold]');
     if (!hold || hold.disabled) return;
